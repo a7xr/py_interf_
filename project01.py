@@ -22,7 +22,7 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self):
         super(QtGui.QMainWindow, self).__init__()
 
-        self.setWindowIcon(QtGui.QIcon('vivetic_ico.png'))   # definir l_icone
+        self.setWindowIcon(QtGui.QIcon('logo.jpg'))   # definir l_icone
 
         self.audioOutput = Phonon.AudioOutput(
         	Phonon.MusicCategory, 
@@ -99,25 +99,26 @@ class MainWindow(QtGui.QMainWindow):
 
     def lire_excel(self):
         from xlrd import open_workbook
-        book = open_workbook('simple.xls')
+        # book = open_workbook('simple.xls')
+        book = open_workbook('resources.csv')
         sheet0 = book.sheet_by_index(0)
         sheet1 = book.sheet_by_index(1)
         print sheet0.row(0)
         print sheet0.col(0)
         print
-        print sheet0.row_slice(0,1)
-        print sheet0.row_slice(0,1,2)
-        print sheet0.row_values(0,1)
-        print sheet0.row_values(0,1,2)
-        print sheet0.row_types(0,1)
-        print sheet0.row_types(0,1,2)
-        print
-        print sheet1.col_slice(0,1)
-        print sheet0.col_slice(0,1,2)
-        print sheet1.col_values(0,1)
-        print sheet0.col_values(0,1,2)
-        print sheet1.col_types(0,1)
-        print sheet0.col_types(0,1,2)
+        # print sheet0.row_slice(0,1)
+        # print sheet0.row_slice(0,1,2)
+        # print sheet0.row_values(0,1)
+        # print sheet0.row_values(0,1,2)
+        # print sheet0.row_types(0,1)
+        # print sheet0.row_types(0,1,2)
+        # print
+        # print sheet1.col_slice(0,1)
+        # print sheet0.col_slice(0,1,2)
+        # print sheet1.col_values(0,1)
+        # print sheet0.col_values(0,1,2)
+        # print sheet1.col_types(0,1)
+        # print sheet0.col_types(0,1,2)
 
 
     def about(self):

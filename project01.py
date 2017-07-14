@@ -86,9 +86,12 @@ class MainWindow(QtGui.QMainWindow):
                     'E:\DISK_D\mamitiana\zik\Nouveau dossier\Embona(Donnah).mp3'
                 )
             )
-            
+
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
+
+    def click_play_audio(self):
+        print "PLAY_audio si on clique"
 
     def about(self):
         QtGui.QMessageBox.information(self, "About Music Player",
@@ -242,13 +245,13 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.addFiles01
         )
 
-        self.bouton_extraire_audio = QtGui.QAction(
-            "Importer",
-            self, 
-            shortcut="Ctrl+P", 
-            enabled=True,
-            triggered=self.extraire_audio
-        )
+        # self.bouton_extraire_audio = QtGui.QAction(
+        #     "Importer",
+        #     self, 
+        #     shortcut="Ctrl+P", 
+        #     enabled=True,
+        #     triggered=self.extraire_audio
+        # )
 
         self.bouton_extraire_audio = QtGui.QPushButton(
             "Extraire audio"
@@ -256,13 +259,19 @@ class MainWindow(QtGui.QMainWindow):
 
         self.bouton_extraire_audio.clicked.connect(self.click_extraire_audio)
 
+        self.bouton_play_audio = QtGui.QPushButton(
+            "Jouer audio"
+        )
+
+        self.bouton_play_audio.clicked.connect(self.click_play_audio)
 
         self.pauseAction = QtGui.QAction(
             self.style().standardIcon(
             	QtGui.QStyle.SP_MediaPause
             ),
             "Pause", self, shortcut="Ctrl+A", enabled=False,
-            triggered=self.mediaObject.pause)
+            triggered=self.mediaObject.pause
+        )
 
         self.stopAction = QtGui.QAction(
                 self.style().standardIcon(
@@ -413,10 +422,15 @@ class MainWindow(QtGui.QMainWindow):
 
         mainLayout = QtGui.QVBoxLayout()
         qvbox_layout_music_table01 = QtGui.QHBoxLayout()
+        qvbox_layout_music_table02 = QtGui.QHBoxLayout()
 
 
         qvbox_layout_music_table01.addWidget(self.musicTable01)
         qvbox_layout_music_table01.addWidget(self.bouton_extraire_audio)
+
+        qvbox_layout_music_table02.addWidget(self.musicTable02)
+        qvbox_layout_music_table02.addWidget(self.bouton_play_audio)
+
 
         mainLayout.addWidget(
             self.musicTable
@@ -442,8 +456,12 @@ class MainWindow(QtGui.QMainWindow):
 
         
 
-        mainLayout.addWidget(
-            self.musicTable02
+        # mainLayout.addWidget(
+        #     self.musicTable02
+        # )
+
+        mainLayout.addLayout(
+            qvbox_layout_music_table02
         )
 
         widget = QtGui.QWidget()

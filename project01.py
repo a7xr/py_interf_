@@ -4,6 +4,8 @@ sip.setapi('QString', 2)
 import sys
 from PyQt4 import QtCore, QtGui
 
+
+
 try:
     from PyQt4.phonon import Phonon
 except ImportError:
@@ -20,7 +22,7 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self):
         super(QtGui.QMainWindow, self).__init__()
 
-        self.setWindowIcon(QtGui.QIcon('Py.ico'))   # definir l_icone
+        self.setWindowIcon(QtGui.QIcon('vivetic_ico.png'))   # definir l_icone
 
         self.audioOutput = Phonon.AudioOutput(
         	Phonon.MusicCategory, 
@@ -46,7 +48,7 @@ class MainWindow(QtGui.QMainWindow):
         self.sources = []
 
     def sizeHint(self):
-        return QtCore.QSize(500, 300)
+        return QtCore.QSize(1000, 300)
 
     def extraire_audio(self):
         print "t_as cliquee... operation extraction audio"
@@ -82,16 +84,41 @@ class MainWindow(QtGui.QMainWindow):
             self.sources.append(Phonon.MediaSource(string)) # self.sources est une liste01.. afaik, il va contenir le playlist01
             # string va contenir le chemin du fichier que t_as parcourue
             print string
-            self.sources.append(Phonon.MediaSource(
-                    'E:\DISK_D\mamitiana\zik\Nouveau dossier\Embona(Donnah).mp3'
-                )
-            )
+
+            # il est possible de faire une chz comme la suivante
+            # self.sources.append(Phonon.MediaSource(
+            #         'E:\DISK_D\mamitiana\zik\Nouveau dossier\Embona(Donnah).mp3'
+            #     )
+            # )
 
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
 
     def click_play_audio(self):
         print "PLAY_audio si on clique"
+
+    def lire_excel(self):
+        from xlrd import open_workbook
+        book = open_workbook('simple.xls')
+        sheet0 = book.sheet_by_index(0)
+        sheet1 = book.sheet_by_index(1)
+        print sheet0.row(0)
+        print sheet0.col(0)
+        print
+        print sheet0.row_slice(0,1)
+        print sheet0.row_slice(0,1,2)
+        print sheet0.row_values(0,1)
+        print sheet0.row_values(0,1,2)
+        print sheet0.row_types(0,1)
+        print sheet0.row_types(0,1,2)
+        print
+        print sheet1.col_slice(0,1)
+        print sheet0.col_slice(0,1,2)
+        print sheet1.col_values(0,1)
+        print sheet0.col_values(0,1,2)
+        print sheet1.col_types(0,1)
+        print sheet0.col_types(0,1,2)
+
 
     def about(self):
         QtGui.QMessageBox.information(self, "About Music Player",
@@ -149,6 +176,12 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable.selectRow(
             self.sources.index(source)
         )
+        
+        # ajouteed
+        # self.musicTable02.selectRow(
+        #     self.sources.index(source)
+        # )
+
         self.timeLcd.display('00:00')
 
     def metaStateChanged(self, newState, oldState):
@@ -204,9 +237,23 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable.setItem(currentRow, 2, albumItem)
         self.musicTable.setItem(currentRow, 3, yearItem)
 
+        # ajouteed
+        # currentRow = self.musicTable.rowCount()
+        # self.musicTable02.insertRow(currentRow)
+        # self.musicTable02.setItem(currentRow, 0, titleItem)
+        # self.musicTable02.setItem(currentRow, 1, artistItem)
+        # self.musicTable02.setItem(currentRow, 2, albumItem)
+        # self.musicTable02.setItem(currentRow, 3, yearItem)
+
         if not self.musicTable.selectedItems():
             self.musicTable.selectRow(0)
             self.mediaObject.setCurrentSource(self.metaInformationResolver.currentSource())
+
+        # ajouteed
+        # if not self.musicTable01.selectedItems():
+        #     self.musicTable01.selectRow(0)
+        #     self.mediaObject.setCurrentSource(self.metaInformationResolver.currentSource())
+
 
         source = self.metaInformationResolver.currentSource()
         index = self.sources.index(self.metaInformationResolver.currentSource()) + 1
@@ -240,7 +287,7 @@ class MainWindow(QtGui.QMainWindow):
         self.import_action = QtGui.QAction(
             "Importer",
             self, 
-            shortcut="Ctrl+P", 
+            shortcut="Ctrl+I", 
             enabled=True,
             triggered=self.addFiles01
         )
@@ -254,13 +301,14 @@ class MainWindow(QtGui.QMainWindow):
         # )
 
         self.bouton_extraire_audio = QtGui.QPushButton(
-            "Extraire audio"
+            "Extraire"
         )
 
-        self.bouton_extraire_audio.clicked.connect(self.click_extraire_audio)
+        # self.bouton_extraire_audio.clicked.connect(self.click_extraire_audio)
+        self.bouton_extraire_audio.clicked.connect(self.lire_excel)
 
         self.bouton_play_audio = QtGui.QPushButton(
-            "Jouer audio"
+            "Jouer"
         )
 
         self.bouton_play_audio.clicked.connect(self.click_play_audio)
@@ -453,12 +501,6 @@ class MainWindow(QtGui.QMainWindow):
         )
 
               
-
-        
-
-        # mainLayout.addWidget(
-        #     self.musicTable02
-        # )
 
         mainLayout.addLayout(
             qvbox_layout_music_table02

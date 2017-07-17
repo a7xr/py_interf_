@@ -29,6 +29,11 @@ class MainWindow(QtGui.QMainWindow):
         	self
         )
 
+        self.connect_sql_server()
+
+
+        
+
         self.mediaObject = Phonon.MediaObject(self)
         self.metaInformationResolver = Phonon.MediaObject(self)
         self.mediaObject.setTickInterval(1000)
@@ -41,7 +46,9 @@ class MainWindow(QtGui.QMainWindow):
         Phonon.createPath(self.mediaObject, self.audioOutput)
 
         self.setupActions()
-        self.setupMenus()
+
+        ## #alternativo # si on veut afficher la barre des menus.. Decommenter la ligne_dessous
+        # self.setupMenus()
         self.setupUi()
         self.timeLcd.display("00:00") 
 
@@ -50,12 +57,53 @@ class MainWindow(QtGui.QMainWindow):
     def sizeHint(self):
         return QtCore.QSize(1000, 300)
 
+    def connect_sql_server(self, 
+            server01 = '192.168.10.63',
+            user01='easy',
+            password01='e@sy1234',
+            database01='AVR7'):
+        """
+        ceci ne devra etre executee qu_une seule fois
+        - ceci est pour la connection aa la bdd
+        """
+        import _mssql
+
+        
+        self.conn_sql_server = _mssql.connect(
+            server=server01, 
+            user=user01, 
+            password=password01, 
+            database=database01)
+
+        if self.conn_sql_server :
+            print "connection ok!"
+        else :
+            print "connection au sql_server ECHOUEE"
+
+    def extract01(self,
+            query = ""):
+        
+        self.conn_sql_server \
+            .execute_query('SELECT * FROM persons01 WHERE salesrep=%s', 'salesrep01')
+        
+        for row in self.conn_sql_server:
+            print "ID=%d, Name=%s" % (row['id'], row['name'])
+
     def extraire_audio(self):
         print "t_as cliquee... operation extraction audio"
 
+    def reinit_comboS(self):
+        # print "reinit combols"
+        self.etat_comboS(
+            campagne = True,
+            call_date = False,
+            easycode = False
+            )
+
     def addFiles(self):
-        files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Audio",
-                QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))
+        files = QtGui.QFileDialog.getOpenFileNames(self, 
+            "Veuillez choisir un Fichier Audio",
+            QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))
 
         if not files:
             return
@@ -69,6 +117,46 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
+
+    
+
+    def etat_comboS(self, 
+            campagne = True,
+            call_date = False,
+            easycode = False):
+        self.combo_box__campagne.setEnabled(campagne)
+        self.combo_box__call_date.setEnabled(call_date)
+        self.combo_box__easycode.setEnabled(easycode)
+
+    def selection_change_combo_easycode(self):
+        print "easycode changed"
+        # print
+        # print
+        # self.extract01()
+        # print
+        # print
+        self.etat_comboS(
+            campagne = False,
+            call_date = False,
+            easycode = False,
+            )
+
+    def selection_change_combo_call_date(self):
+        print "call_date combo changed"
+        self.etat_comboS(
+            campagne = False,
+            call_date = False,
+            easycode = True,
+            )
+
+
+    def selection_change_combo_campagne(self):
+        print "changed combo box of campagne"
+        self.etat_comboS(
+            campagne = False,
+            call_date = True,
+            easycode = False,
+            )
 
     def addFiles01(self):
         files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Audio",
@@ -97,18 +185,51 @@ class MainWindow(QtGui.QMainWindow):
     def click_play_audio(self):
         print "PLAY_audio si on clique"
 
-    def lire_excel(self):
+    def lire_xls_csv(self):
+        self.lire_xlsx()
+        # print
+        # print
+        # print
+        # print
+        # print "#################################"
+        # print
+        # print
+        # print
+        # print
+        # print
+        # self.lire_csv()
+        
+
+    def lire_csv(self):
+        import csv
+        with open('resources.csv', 'rb') as csvfile:
+            spamreader = csv.reader(
+                csvfile, 
+                delimiter=' ', 
+                quotechar='|'
+            )
+            for row in spamreader:
+                print ', '.join(row)
+
+    def lire_xlsx(self):
         from xlrd import open_workbook
-        # book = open_workbook('simple.xls')
-        book = open_workbook('resources.csv')
-        sheet0 = book.sheet_by_index(0)
-        sheet1 = book.sheet_by_index(1)
-        print sheet0.row(0)
-        print sheet0.col(0)
-        print
-        # print sheet0.row_slice(0,1)
+        book = open_workbook('file01.xlsx')
+        
+        sheet0 = book.sheet_by_index(0) 
+        # sheet1 = book.sheet_by_index(1)
+
+
+        #for i in range(0, sheet0.nrows):
+        #     for j in range(0, sheet0.ncols):
+        #        print sheet0.row_values(i, j, j+1)
+        #    print
+        
+        
+        #print sheet0.col(0)
+        # print sheet0.nrows
+        print sheet0.row_values(0, 1, 2)
         # print sheet0.row_slice(0,1,2)
-        # print sheet0.row_values(0,1)
+        # print sheet0.row_values(0,0)
         # print sheet0.row_values(0,1,2)
         # print sheet0.row_types(0,1)
         # print sheet0.row_types(0,1,2)
@@ -173,7 +294,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.mediaObject.stop()
 
-    def sourceChanged(self, source):
+    def sourceChanged(self, source):    # afaik, ceci va s_exe si on a cliquee sur autre music dans play_list
         self.musicTable.selectRow(
             self.sources.index(source)
         )
@@ -304,9 +425,13 @@ class MainWindow(QtGui.QMainWindow):
         self.bouton_extraire_audio = QtGui.QPushButton(
             "Extraire"
         )
+        self.bouton_reinit_comboS = QtGui.QPushButton(
+            "Reinitialiser"
+        )
 
         # self.bouton_extraire_audio.clicked.connect(self.click_extraire_audio)
-        self.bouton_extraire_audio.clicked.connect(self.lire_excel)
+        self.bouton_extraire_audio.clicked.connect(self.lire_xls_csv)
+        self.bouton_reinit_comboS.clicked.connect(self.reinit_comboS)
 
         self.bouton_play_audio = QtGui.QPushButton(
             "Jouer"
@@ -421,6 +546,54 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable = QtGui.QTableWidget(0, 4)
         self.musicTable01 = QtGui.QTableWidget(0, 4)
         self.musicTable02 = QtGui.QTableWidget(0, 4)
+        
+        self.combo_box__campagne = QtGui.QComboBox()
+        self.combo_box__campagne.addItems(
+            ["campagne01", "campagne02", "campagne03"]
+        )
+        self.combo_box__campagne.\
+            currentIndexChanged.\
+            connect(
+                self.selection_change_combo_campagne
+            )
+
+
+        self.combo_box__call_date = QtGui.QComboBox()
+        self.combo_box__call_date.addItems(
+            ["call_date01", "call_date02", "call_date03"]
+        )
+
+        self.combo_box__easycode = QtGui.QComboBox()
+        self.combo_box__easycode.addItems(
+            ["easycode01", "easycode02", "easycode03"]
+        )
+        self.combo_box__easycode.\
+            currentIndexChanged.\
+            connect(
+                self.selection_change_combo_easycode
+            )
+
+
+        # self.combo_box__call_date.setEnabled(False)
+
+        
+
+        self.combo_box__call_date.\
+            currentIndexChanged.\
+            connect(
+                self.selection_change_combo_call_date
+            )
+
+
+        # etat des self.(
+        #    combo_box__campagne, 
+        #    combo_box__call_date, 
+        #    combo_box__easycode)
+        # # au temps = 0
+        self.combo_box__campagne.setEnabled(True)
+        self.combo_box__call_date.setEnabled(False)
+        self.combo_box__easycode.setEnabled(False)
+
 
         self.musicTable.setHorizontalHeaderLabels(headers)
         self.musicTable.setSelectionMode(
@@ -474,8 +647,12 @@ class MainWindow(QtGui.QMainWindow):
         qvbox_layout_music_table02 = QtGui.QHBoxLayout()
 
 
+        qvbox_layout_music_table01.addWidget(self.combo_box__campagne)
+        qvbox_layout_music_table01.addWidget(self.combo_box__call_date)
+        qvbox_layout_music_table01.addWidget(self.combo_box__easycode)
         qvbox_layout_music_table01.addWidget(self.musicTable01)
         qvbox_layout_music_table01.addWidget(self.bouton_extraire_audio)
+        qvbox_layout_music_table01.addWidget(self.bouton_reinit_comboS)
 
         qvbox_layout_music_table02.addWidget(self.musicTable02)
         qvbox_layout_music_table02.addWidget(self.bouton_play_audio)

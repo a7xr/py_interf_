@@ -1,7 +1,8 @@
 import sip
 sip.setapi('QString', 2)
-
 import sys
+
+from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui
 
 
@@ -29,9 +30,20 @@ class MainWindow(QtGui.QMainWindow):
         	self
         )
 
+        self.fichier_xlsx = "file01.xlsx"
+
+        self.fichier_remote_dl = "" 
+        self.fichier_sauve_local = ""
+
+        self.list_fichier_dl = []
+        # on va telechargee 1 aa 1 les fichier
+        # # ceci va contenir le telechargement en cours 
+
         self.connect_sql_server()
 
-
+        self.campagne = ""
+        self.call_date = ""
+        self.easycode = ""
         
 
         self.mediaObject = Phonon.MediaObject(self)
@@ -48,11 +60,14 @@ class MainWindow(QtGui.QMainWindow):
         self.setupActions()
 
         ## #alternativo # si on veut afficher la barre des menus.. Decommenter la ligne_dessous
-        # self.setupMenus()
+        self.setupMenus()
         self.setupUi()
         self.timeLcd.display("00:00") 
 
         self.sources = []
+
+        ## point_important
+        # tandremo am selection_
 
     def sizeHint(self):
         return QtCore.QSize(1000, 300)
@@ -67,8 +82,6 @@ class MainWindow(QtGui.QMainWindow):
         - ceci est pour la connection aa la bdd
         """
         import _mssql
-
-        
         self.conn_sql_server = _mssql.connect(
             server=server01, 
             user=user01, 
@@ -92,14 +105,52 @@ class MainWindow(QtGui.QMainWindow):
     def extraire_audio(self):
         print "t_as cliquee... operation extraction audio"
 
+
     def reinit_comboS(self):
-        # print "reinit combols"
+        
+        # self.combo_box__call_date.clear()
+        # self.combo_box__easycode.clear()
         self.etat_comboS(
             campagne = True,
             call_date = False,
             easycode = False
             )
+        
+    def import_xls(self):
+        """
+        ceci va retourner le Chemin du fichier.xlsx qu_on veut ajouter
+        """
+        files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Excel APPROPRIEE",
+                QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))
 
+        if not files:
+            return
+
+        index = len(self.sources)
+
+        if len (files) != 1:
+            print "Vous avez choisit plusieurs fichiers... Veuillez choisir qu'une seule"
+            QtGui.QMessageBox.information(
+                self, 
+
+                "Erreur d'Import de fichier", 
+                "Erreur d'Import de fichier\n"
+                "- Veuillez choisir qu'une seule fichier"
+                )
+            # raw_input("")
+            sys.exit(0)
+
+        
+        # activer ceci si on accepte l_import de plusieurs fichiers
+        # for string in files:    # string va contenir le chemin du fichier que t_as parcourue
+        #     self.sources.append(Phonon.MediaSource(string)) # self.sources est une liste01.. afaik, il va contenir le playlist01
+            # string va contenir le chemin du fichier que t_as parcourue
+        #     print string
+
+        self.fichier_xlsx = files
+        print self.fichier_xlsx
+
+            
     def addFiles(self):
         files = QtGui.QFileDialog.getOpenFileNames(self, 
             "Veuillez choisir un Fichier Audio",
@@ -118,8 +169,6 @@ class MainWindow(QtGui.QMainWindow):
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
 
-    
-
     def etat_comboS(self, 
             campagne = True,
             call_date = False,
@@ -130,24 +179,80 @@ class MainWindow(QtGui.QMainWindow):
 
     def selection_change_combo_easycode(self):
         print "easycode changed"
-        # print
-        # print
-        # self.extract01()
-        # print
-        # print
+        self.campagne = self.combo_box__campagne.currentText()
+        self.call_date = self.combo_box__call_date.currentText()
+        self.easycode = self.combo_box__easycode.currentText()
+        # print "campagne: "+ self.combo_box__campagne.currentText()
+        # print "call_date: " + self.combo_box__call_date.currentText()
+        # print "easycode: " + self.combo_box__easycode.currentText()
+        
         self.etat_comboS(
             campagne = False,
             call_date = False,
             easycode = False,
             )
 
+        req = "SELECT (time_stamp, 1, 4) "\
+            +"+ '\\' + substring(time_stamp, 5, 2) "\
+            +"+ '\\' + substring(time_stamp, 7, 2) "\
+            +"+ '\\' + substring(time_stamp, 9, 2) "\
+            +"+ '\\' + substring(time_stamp, 11, 2) "\
+            +"+ '\\' + substring(time_stamp, 13, 2) "\
+            +"+ rec_key + rec_time .codec FROM AVR7.dbo.recording WHERE "\
+            +"CONVERT(varchar(8), time_stamp) = '" \
+            + self.call_date \
+            + "' AND rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+            + "easy.dbo."\
+            +self.campagne\
+            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
+            + self.campagne \
+            + ".easycode " \
+            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
+            +"INNER JOIN easy.dbo.call_thread " \
+            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
+            +"WHERE easy.dbo."\
+            +self.campagne \
+            + ".easycode = "\
+            +self.easycode + ")"\
+        
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        print "requete:"
+        print req
+        ###eto
+
+
+    
+
+
+
     def selection_change_combo_call_date(self):
+        
         print "call_date combo changed"
+        
         self.etat_comboS(
             campagne = False,
             call_date = False,
             easycode = True,
             )
+
+        list_easycode = \
+            self.lire_xlsx__get_easycode(
+                campgn = self.combo_box__campagne.currentText(),
+                calling_date = self.combo_box__call_date.currentText())
+        # print "tiik"
+        print list_easycode
+        list_easycode = list(set(list_easycode))
+        list_easycode = sorted(list_easycode)
+
+        self.combo_box__easycode.addItems(list_easycode)
+
+
+
+
 
 
     def selection_change_combo_campagne(self):
@@ -157,6 +262,28 @@ class MainWindow(QtGui.QMainWindow):
             call_date = True,
             easycode = False,
             )
+
+        # print self.combo_box__campagne.currentText()
+
+        list_call_date01 = \
+            self.lire_xlsx__get_call_date(
+                campgn = self.combo_box__campagne.currentText())
+
+        print self.combo_box__campagne.currentText()
+        print "#####################################"
+        print list_call_date01
+        list_call_date01 = list(set(list_call_date01))
+        list_call_date01 = sorted(list_call_date01)
+        
+        # self.combo_box__call_date.clear()
+        self.combo_box__call_date.addItems(list_call_date01)
+
+
+        # self.lire_xlsx__get_call_date(
+            # campgn = str(
+                # self.combo_box__campagne.currentText()
+                # )
+            # )
 
     def addFiles01(self):
         files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Audio",
@@ -198,55 +325,75 @@ class MainWindow(QtGui.QMainWindow):
         # print
         # print
         # self.lire_csv()
-        
+
 
     def lire_csv(self):
         import csv
         with open('resources.csv', 'rb') as csvfile:
-            spamreader = csv.reader(
+            csv01 = csv.reader(
                 csvfile, 
                 delimiter=' ', 
                 quotechar='|'
             )
-            for row in spamreader:
+            for row in csv01:
                 print ', '.join(row)
 
-    def lire_xlsx(self):
-        from xlrd import open_workbook
-        book = open_workbook('file01.xlsx')
+    def lire_xlsx_campagne(
+            self,
+            fichier_xlsx = 'file01.xlsx'
+        ):
+        """
+        ceci va retourner tout les list_campagnes qui sont sur le fichier.xlsx
+        - list_campagnes sont d'abord trier PUIS supprimer_doublons
+        """
+        
+        
+        list_campagnes = []
+
+
+
+        book = open_workbook(
+            self.fichier_xlsx   # ce fichier doit etre inclus Apres clique du bouton__importer_action
+                # pour le moment ceci n_est que pour le test
+            ) 
         
         sheet0 = book.sheet_by_index(0) 
-        # sheet1 = book.sheet_by_index(1)
+
+        # print sheet0.row_values(0, 1, 2)
+
+        for i in range(2, sheet0.nrows):
+            list_campagnes.append(
+                sheet0.row_values(i, 0, 1)[0]
+                )
+
+        list_campagnes = list(set(list_campagnes))
+        list_campagnes = sorted(list_campagnes)
 
 
-        #for i in range(0, sheet0.nrows):
-        #     for j in range(0, sheet0.ncols):
-        #        print sheet0.row_values(i, j, j+1)
-        #    print
-        
-        
-        #print sheet0.col(0)
-        # print sheet0.nrows
-        print sheet0.row_values(0, 1, 2)
-        # print sheet0.row_slice(0,1,2)
-        # print sheet0.row_values(0,0)
-        # print sheet0.row_values(0,1,2)
-        # print sheet0.row_types(0,1)
-        # print sheet0.row_types(0,1,2)
+        # print "liste campagne:"
+        # print list_campagnes
         # print
-        # print sheet1.col_slice(0,1)
-        # print sheet0.col_slice(0,1,2)
-        # print sheet1.col_values(0,1)
-        # print sheet0.col_values(0,1,2)
-        # print sheet1.col_types(0,1)
-        # print sheet0.col_types(0,1,2)
+        return list_campagnes
+        
 
 
     def about(self):
-        QtGui.QMessageBox.information(self, "About Music Player",
-                "The Music Player example shows how to use Phonon - the "
-                "multimedia framework that comes with Qt - to create a "
-                "simple music player.")
+        # QtGui.QMessageBox.information(self, "About Music Player",
+        #         "The Music Player example shows how to use Phonon - the "
+        #         "multimedia framework that comes with Qt - to create a "
+        #         "simple music player.")
+        QtGui.QMessageBox.information(
+                self, 
+
+                "Outil pour le Controle des Appels",
+
+                "Outil pour le Controle des Appels\n"
+                "- On choisit un fichier.xlsx\n"
+                "- On choisit les champs (Campagne, Call_date, Easycode)\n"
+                "- On clique sur bouton(Extraire) pour Telecharger les Audio correspondant\n"
+                "- On choisit le fichier Audio qu'on veut lire\n"
+                "- On clique sur bouton(Jouer) pour le mettre dans le Playlist"
+                )
 
     def stateChanged(self, newState, oldState):
         if newState == Phonon.ErrorState:
@@ -305,6 +452,39 @@ class MainWindow(QtGui.QMainWindow):
         # )
 
         self.timeLcd.display('00:00')
+        # remote_file01 = "\\mcuci\\Storage$\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav",
+
+    def dl_fichier (
+        self,
+        bool01 = True,
+        remote_file01 = "\\\\mcuci\\Storage$\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav",
+        sauvegardee_dans = ".\\ato01.wav"):
+
+        print "clicked test"
+        # sys.exit(0)
+        import os
+        import os.path
+        if (os.path.exists(sauvegardee_dans)):
+            print "fichier: " + sauvegardee_dans + " existe dans votre ordi"
+            sys.exit(0)
+        else:
+            
+            # mlam ... lasa nisi anlay param_bool01 io
+                # print type (remote_file01)
+                # print remote_file01
+                # print type (sauvegardee_dans)
+                # print sauvegardee_dans
+            
+            cmd01 = 'smbget '\
+                + remote_file01\
+                +' '\
+                + sauvegardee_dans
+            # sys.exit(0)
+            os.system(cmd01)
+            print "fichier: " \
+                + remote_file01 \
+                + " est sauvee dans "\
+                + sauvegardee_dans
 
     def metaStateChanged(self, newState, oldState):
         if newState == Phonon.ErrorState:
@@ -387,6 +567,64 @@ class MainWindow(QtGui.QMainWindow):
             if self.musicTable.columnWidth(0) > 300:
                 self.musicTable.setColumnWidth(0, 300)
 
+    def lire_xlsx__get_easycode(self, 
+            fichier_xlsx = 'file01.xlsx',
+            campgn = "0",
+            calling_date = ""):
+        """
+        va retourner les easycode qui sont reliees aa param_campgn ET param_call_date
+        """
+        res_list_easycode = []
+
+        print "get call_date"
+
+        book = open_workbook(
+            fichier_xlsx   # ce fichier doit etre inclus Apres clique du bouton__importer_action
+                # pour le moment ceci n_est que pour le test
+            ) 
+        
+        sheet0 = book.sheet_by_index(0) 
+
+        for i in range(2, sheet0.nrows):
+            if (    
+                    (sheet0.row_values(i, 0, 1)[0] == campgn) \
+                    & \
+                    (sheet0.row_values(i, 1, 2)[0] == calling_date) \
+            ):
+                res_list_easycode.append(
+                    sheet0.row_values(i, 2, 3)[0]
+                )
+            else:
+                pass
+        return res_list_easycode
+
+    def lire_xlsx__get_call_date(self, 
+            fichier_xlsx = 'file01.xlsx',
+            campgn = "0"):
+        """
+        va retourner les call_date qui sont reliees aa param_campgn
+        """
+        res_list_call_date = []
+
+        print "get call_date"
+
+        book = open_workbook(
+            fichier_xlsx   # ce fichier doit etre inclus Apres clique du bouton__importer_action
+                # pour le moment ceci n_est que pour le test
+            ) 
+        
+        sheet0 = book.sheet_by_index(0) 
+
+        for i in range(1, sheet0.nrows):
+            if (sheet0.row_values(i, 0, 1)[0] == campgn):
+                res_list_call_date.append(
+                    sheet0.row_values(i, 1, 2)[0]
+                )
+            else:
+                pass
+        res_list_call_date 
+        return res_list_call_date
+
     def click_extraire_audio(self):
         print "click extraire audio"
 
@@ -411,7 +649,7 @@ class MainWindow(QtGui.QMainWindow):
             self, 
             shortcut="Ctrl+I", 
             enabled=True,
-            triggered=self.addFiles01
+            triggered=self.import_xls
         )
 
         # self.bouton_extraire_audio = QtGui.QAction(
@@ -429,9 +667,22 @@ class MainWindow(QtGui.QMainWindow):
             "Reinitialiser"
         )
 
+        self.bouton_test = QtGui.QPushButton(
+            "Test"
+        )
+
         # self.bouton_extraire_audio.clicked.connect(self.click_extraire_audio)
         self.bouton_extraire_audio.clicked.connect(self.lire_xls_csv)
-        self.bouton_reinit_comboS.clicked.connect(self.reinit_comboS)
+        self.bouton_reinit_comboS.clicked.connect(
+            self.reinit_comboS
+            # (
+                # text01 = "akondro"
+            # )
+        )
+        self.bouton_test.clicked.connect(
+            self.dl_fichier ## bouton_test_dl
+            # self.select_fichier_dl
+        )
 
         self.bouton_play_audio = QtGui.QPushButton(
             "Jouer"
@@ -548,8 +799,10 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable02 = QtGui.QTableWidget(0, 4)
         
         self.combo_box__campagne = QtGui.QComboBox()
+        
         self.combo_box__campagne.addItems(
-            ["campagne01", "campagne02", "campagne03"]
+            # ["campagne01", "campagne02", "campagne03"]
+            self.lire_xlsx_campagne()
         )
         self.combo_box__campagne.\
             currentIndexChanged.\
@@ -557,11 +810,14 @@ class MainWindow(QtGui.QMainWindow):
                 self.selection_change_combo_campagne
             )
 
-
         self.combo_box__call_date = QtGui.QComboBox()
         self.combo_box__call_date.addItems(
-            ["call_date01", "call_date02", "call_date03"]
+            ["call_date"]
         )
+        self.combo_box__campagne.setStyleSheet('''
+            QComboBox { max-width: 100px; min-height: 20px;}
+            '''    
+            )
 
         self.combo_box__easycode = QtGui.QComboBox()
         self.combo_box__easycode.addItems(
@@ -655,6 +911,7 @@ class MainWindow(QtGui.QMainWindow):
         qvbox_layout_music_table01.addWidget(self.bouton_reinit_comboS)
 
         qvbox_layout_music_table02.addWidget(self.musicTable02)
+        qvbox_layout_music_table02.addWidget(self.bouton_test)
         qvbox_layout_music_table02.addWidget(self.bouton_play_audio)
 
 

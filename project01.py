@@ -69,6 +69,11 @@ class MainWindow(QtGui.QMainWindow):
         ## point_important
         # tandremo am selection_
 
+    def del01(self):
+        self.qtlist_campagne.takeItem(1) 
+        self.qtlist_campagne.addItem("cocococococococo")
+
+
     def sizeHint(self):
         return QtCore.QSize(1000, 300)
 
@@ -105,15 +110,50 @@ class MainWindow(QtGui.QMainWindow):
     def extraire_audio(self):
         print "t_as cliquee... operation extraction audio"
 
+    def double_click_qtlist_easycode(self):
+        self.campagne = self.combo_box__campagne.currentText()
+        self.etat_comboS(
+            campagne = False,
+            call_date = False
+            )
+        req = "SELECT (time_stamp, 1, 4) "\
+            +"+ '\\' + substring(time_stamp, 5, 2) "\
+            +"+ '\\' + substring(time_stamp, 7, 2) "\
+            +"+ '\\' + substring(time_stamp, 9, 2) "\
+            +"+ '\\' + substring(time_stamp, 11, 2) "\
+            +"+ '\\' + substring(time_stamp, 13, 2) "\
+            +"+ rec_key + rec_time .codec FROM AVR7.dbo.recording WHERE "\
+            +"CONVERT(varchar(8), time_stamp) = '" \
+            + self.call_date \
+            + "' AND rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+            + "easy.dbo."\
+            +self.campagne\
+            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
+            + self.campagne \
+            + ".easycode " \
+            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
+            +"INNER JOIN easy.dbo.call_thread " \
+            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
+            +"WHERE easy.dbo."\
+            +self.campagne \
+            + ".easycode = "\
+            +self.easycode + ")"
+
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        print "requete:"
+        print req
+        
+        print ""
 
     def reinit_comboS(self):
         
-        # self.combo_box__call_date.clear()
-        # self.combo_box__easycode.clear()
         self.etat_comboS(
             campagne = True,
-            call_date = False,
-            easycode = False
+            call_date = False
             )
         
     def import_xls(self):
@@ -171,96 +211,28 @@ class MainWindow(QtGui.QMainWindow):
 
     def etat_comboS(self, 
             campagne = True,
-            call_date = False,
-            easycode = False):
+            call_date = False):
         self.combo_box__campagne.setEnabled(campagne)
-        self.combo_box__call_date.setEnabled(call_date)
-        self.combo_box__easycode.setEnabled(easycode)
 
-    def selection_change_combo_easycode(self):
-        print "easycode changed"
-        self.campagne = self.combo_box__campagne.currentText()
-        self.call_date = self.combo_box__call_date.currentText()
-        self.easycode = self.combo_box__easycode.currentText()
-        # print "campagne: "+ self.combo_box__campagne.currentText()
-        # print "call_date: " + self.combo_box__call_date.currentText()
-        # print "easycode: " + self.combo_box__easycode.currentText()
-        
-        self.etat_comboS(
-            campagne = False,
-            call_date = False,
-            easycode = False,
-            )
-
-        req = "SELECT (time_stamp, 1, 4) "\
-            +"+ '\\' + substring(time_stamp, 5, 2) "\
-            +"+ '\\' + substring(time_stamp, 7, 2) "\
-            +"+ '\\' + substring(time_stamp, 9, 2) "\
-            +"+ '\\' + substring(time_stamp, 11, 2) "\
-            +"+ '\\' + substring(time_stamp, 13, 2) "\
-            +"+ rec_key + rec_time .codec FROM AVR7.dbo.recording WHERE "\
-            +"CONVERT(varchar(8), time_stamp) = '" \
-            + self.call_date \
-            + "' AND rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
-            + "easy.dbo."\
-            +self.campagne\
-            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
-            + self.campagne \
-            + ".easycode " \
-            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
-            +"INNER JOIN easy.dbo.call_thread " \
-            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
-            +"WHERE easy.dbo."\
-            +self.campagne \
-            + ".easycode = "\
-            +self.easycode + ")"\
-        
-        print ""
-        print ""
-        print ""
-        print ""
-        print ""
-        print "requete:"
-        print req
-        ###eto
+    
 
 
     
 
 
 
-    def selection_change_combo_call_date(self):
-        
-        print "call_date combo changed"
-        
-        self.etat_comboS(
-            campagne = False,
-            call_date = False,
-            easycode = True,
-            )
-
-        list_easycode = \
-            self.lire_xlsx__get_easycode(
-                campgn = self.combo_box__campagne.currentText(),
-                calling_date = self.combo_box__call_date.currentText())
-        # print "tiik"
-        print list_easycode
-        list_easycode = list(set(list_easycode))
-        list_easycode = sorted(list_easycode)
-
-        self.combo_box__easycode.addItems(list_easycode)
 
 
 
 
 
 
-    def selection_change_combo_campagne(self):
+
+    def selection_change_combo_campagne(self):  
         print "changed combo box of campagne"
         self.etat_comboS(
             campagne = False,
-            call_date = True,
-            easycode = False,
+            call_date = True
             )
 
         # print self.combo_box__campagne.currentText()
@@ -275,10 +247,7 @@ class MainWindow(QtGui.QMainWindow):
         list_call_date01 = list(set(list_call_date01))
         list_call_date01 = sorted(list_call_date01)
         
-        # self.combo_box__call_date.clear()
-        self.combo_box__call_date.addItems(list_call_date01)
-
-
+        
         # self.lire_xlsx__get_call_date(
             # campgn = str(
                 # self.combo_box__campagne.currentText()
@@ -454,11 +423,14 @@ class MainWindow(QtGui.QMainWindow):
         self.timeLcd.display('00:00')
         # remote_file01 = "\\mcuci\\Storage$\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav",
 
+    def changed_campagne(self):
+        print "changed campagne"
+
     def dl_fichier (
         self,
         bool01 = True,
         remote_file01 = "\\\\mcuci\\Storage$\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav",
-        sauvegardee_dans = ".\\ato01.wav"):
+        sauvegardee_dans = ".\\ato100.wav"):
 
         print "clicked test"
         # sys.exit(0)
@@ -567,36 +539,6 @@ class MainWindow(QtGui.QMainWindow):
             if self.musicTable.columnWidth(0) > 300:
                 self.musicTable.setColumnWidth(0, 300)
 
-    def lire_xlsx__get_easycode(self, 
-            fichier_xlsx = 'file01.xlsx',
-            campgn = "0",
-            calling_date = ""):
-        """
-        va retourner les easycode qui sont reliees aa param_campgn ET param_call_date
-        """
-        res_list_easycode = []
-
-        print "get call_date"
-
-        book = open_workbook(
-            fichier_xlsx   # ce fichier doit etre inclus Apres clique du bouton__importer_action
-                # pour le moment ceci n_est que pour le test
-            ) 
-        
-        sheet0 = book.sheet_by_index(0) 
-
-        for i in range(2, sheet0.nrows):
-            if (    
-                    (sheet0.row_values(i, 0, 1)[0] == campgn) \
-                    & \
-                    (sheet0.row_values(i, 1, 2)[0] == calling_date) \
-            ):
-                res_list_easycode.append(
-                    sheet0.row_values(i, 2, 3)[0]
-                )
-            else:
-                pass
-        return res_list_easycode
 
     def lire_xlsx__get_call_date(self, 
             fichier_xlsx = 'file01.xlsx',
@@ -680,8 +622,9 @@ class MainWindow(QtGui.QMainWindow):
             # )
         )
         self.bouton_test.clicked.connect(
-            self.dl_fichier ## bouton_test_dl
+            # self.dl_fichier ## bouton_test_dl
             # self.select_fichier_dl
+            self.del01
         )
 
         self.bouton_play_audio = QtGui.QPushButton(
@@ -797,8 +740,36 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable = QtGui.QTableWidget(0, 4)
         self.musicTable01 = QtGui.QTableWidget(0, 4)
         self.musicTable02 = QtGui.QTableWidget(0, 4)
+
+        self.musicTable01.setItem(0,0, QtGui.QTableWidgetItem("Item (1,1)"))
+        self.musicTable01.setItem(0,1, QtGui.QTableWidgetItem("Item (1,2)"))
+        self.musicTable01.setItem(1,0, QtGui.QTableWidgetItem("Item (2,1)"))
+        self.musicTable01.setItem(1,1, QtGui.QTableWidgetItem("Item (2,2)"))
+        self.musicTable01.setItem(2,0, QtGui.QTableWidgetItem("Item (3,1)"))
+        self.musicTable01.setItem(2,1, QtGui.QTableWidgetItem("Item (3,2)"))
+        self.musicTable01.setItem(3,0, QtGui.QTableWidgetItem("Item (4,1)"))
+        self.musicTable01.setItem(3,1, QtGui.QTableWidgetItem("Item (4,2)"))
+        self.musicTable01.show()
         
         self.combo_box__campagne = QtGui.QComboBox()
+
+        self.qtlist_campagne = QtGui.QListWidget()
+        self.qtlist_campagne.addItem("campagne01")
+        self.qtlist_campagne.addItem("campagne02")
+        self.qtlist_campagne.addItem("campagne03")
+        self.qtlist_campagne.addItem("campagne04")
+        self.qtlist_campagne.addItem("campagne05")
+        self.qtlist_campagne.addItem("campagne06")
+        self.qtlist_campagne.addItem("campagne07")
+        self.qtlist_campagne.addItem("campagne08")
+        self.qtlist_campagne.addItem("campagne09")
+        self.qtlist_campagne.addItem("campagne10")
+        self.qtlist_campagne.addItem("campagne11")
+       
+
+        self.qtlist_campagne.\
+            currentItemChanged.\
+            connect(self.changed_campagne)
         
         self.combo_box__campagne.addItems(
             # ["campagne01", "campagne02", "campagne03"]
@@ -810,46 +781,22 @@ class MainWindow(QtGui.QMainWindow):
                 self.selection_change_combo_campagne
             )
 
-        self.combo_box__call_date = QtGui.QComboBox()
-        self.combo_box__call_date.addItems(
-            ["call_date"]
-        )
+        
         self.combo_box__campagne.setStyleSheet('''
             QComboBox { max-width: 100px; min-height: 20px;}
             '''    
             )
 
-        self.combo_box__easycode = QtGui.QComboBox()
-        self.combo_box__easycode.addItems(
-            ["easycode01", "easycode02", "easycode03"]
-        )
-        self.combo_box__easycode.\
-            currentIndexChanged.\
-            connect(
-                self.selection_change_combo_easycode
-            )
-
-
-        # self.combo_box__call_date.setEnabled(False)
 
         
 
-        self.combo_box__call_date.\
-            currentIndexChanged.\
-            connect(
-                self.selection_change_combo_call_date
-            )
 
 
         # etat des self.(
-        #    combo_box__campagne, 
-        #    combo_box__call_date, 
-        #    combo_box__easycode)
+        #    combo_box__campagne)
         # # au temps = 0
         self.combo_box__campagne.setEnabled(True)
-        self.combo_box__call_date.setEnabled(False)
-        self.combo_box__easycode.setEnabled(False)
-
+        
 
         self.musicTable.setHorizontalHeaderLabels(headers)
         self.musicTable.setSelectionMode(
@@ -882,9 +829,9 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         playbackLayout = QtGui.QHBoxLayout()
-        qhboxLayout01 = QtGui.QHBoxLayout()
+        qhboxlayout_toolbar_play = QtGui.QHBoxLayout()
         playbackLayout.addWidget(bar)
-        qhboxLayout01.addWidget(qtool_bar02)
+        qhboxlayout_toolbar_play.addWidget(qtool_bar02)
 
         playbackLayout.addStretch()
         playbackLayout.addWidget(
@@ -904,8 +851,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
         qvbox_layout_music_table01.addWidget(self.combo_box__campagne)
-        qvbox_layout_music_table01.addWidget(self.combo_box__call_date)
-        qvbox_layout_music_table01.addWidget(self.combo_box__easycode)
+        qvbox_layout_music_table01.addWidget(self.qtlist_campagne)
         qvbox_layout_music_table01.addWidget(self.musicTable01)
         qvbox_layout_music_table01.addWidget(self.bouton_extraire_audio)
         qvbox_layout_music_table01.addWidget(self.bouton_reinit_comboS)
@@ -928,7 +874,7 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         mainLayout.addLayout(
-            qhboxLayout01
+            qhboxlayout_toolbar_play
         )  
 
         mainLayout.addLayout(
@@ -955,13 +901,20 @@ class MainWindow(QtGui.QMainWindow):
         )
 
 
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
-    app.setApplicationName("Music Player")
-    app.setQuitOnLastWindowClosed(True)
-    app.setWindowIcon(QtGui.QIcon('Py.ico'))
 
-    window = MainWindow()
+
+
+
+
+app = QtGui.QApplication(sys.argv)
+app.setApplicationName("Music Player")
+app.setQuitOnLastWindowClosed(True)
+app.setWindowIcon(QtGui.QIcon('Py.ico'))
+
+window = MainWindow()
+
+if __name__ == '__main__':
+    
     window.show()
 
     sys.exit(app.exec_())

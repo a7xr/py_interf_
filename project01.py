@@ -1,9 +1,15 @@
 import sip
 sip.setapi('QString', 2)
 import sys
+import os
+import os.path
+from subprocess import check_output
+import psycopg2
 
 from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui
+
+
 
 
 
@@ -32,18 +38,16 @@ class MainWindow(QtGui.QMainWindow):
 
         self.fichier_xlsx = "file01.xlsx"
 
-        self.fichier_remote_dl = "" 
-        self.fichier_sauve_local = ""
-
-        self.list_fichier_dl = []
-        # on va telechargee 1 aa 1 les fichier
-        # # ceci va contenir le telechargement en cours 
-
         self.connect_sql_server()
+        self.connect_pg()
 
         self.campagne = ""
         self.call_date = ""
-        self.easycode = ""
+        self.multieasycode = ""
+
+        self.list_monoeasycode = []
+
+
         
 
         self.mediaObject = Phonon.MediaObject(self)
@@ -62,20 +66,159 @@ class MainWindow(QtGui.QMainWindow):
         ## #alternativo # si on veut afficher la barre des menus.. Decommenter la ligne_dessous
         self.setupMenus()
         self.setupUi()
+        self.etat_elemS(
+            campg = True,
+            multieasyc = True,
+            monoeasyc = True,
+            dldd = True
+        )
         self.timeLcd.display("00:00") 
 
         self.sources = []
 
-        ## point_important
-        # tandremo am selection_
+    def clicked_play_action(self):
+        self.mediaObject.play()
+        print "you clicked play_button"
 
-    def del01(self):
-        self.qtlist_campagne.takeItem(1) 
-        self.qtlist_campagne.addItem("cocococococococo")
+    def etat_elemS(self,
+            campg = False,
+            multieasyc = False,
+            monoeasyc = False,
+            dldd = False):
+        self.combo_box__campagne.setEnabled(campg)
+        self.qtlist_multieasycode.setEnabled(multieasyc)
+        
+        self.qtlist_dldd.setEnabled(dldd)
+        print ""
+
+    def umount_samba_server(self):
+        from subprocess import Popen
+        Popen("bat_files\\umount_samba_voice.bat")
+        print "unmounted samba_voice "
+        Popen("bat_files\\umount_samba_Storage.bat")
+        print "unmounted samba_Storage"
+        
+    def double_clicked_qtable01(self):
+        print "double clicked potato" 
+        
+        self.sources.append(Phonon.MediaSource(
+            "E:\DISK_D\mamitiana\zik\Nouveau dossier\Rabl - Ra fitia.mp3"
+            ))
+
+
+            
+        index = len(self.sources)
+        print "index: " + str(index)
+        if self.sources:
+            self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
+
+        
+
+    def mount_samba_server(self):
+        '''
+        Ny "voice" dia montena ao am V:
+        Ny "Storage" dia montena ao am S:
+        '''
+        from subprocess import Popen
+        Popen("bat_files\\mount_samba_voice.bat")
+        print "samba_voice mounted"
+        Popen("bat_files\\mount_samba_Storage.bat")
+        print "samba_Storage mounted"
+        print "mount samba server"
+
+
+
+    def double_clicked_multieasycode(self):
+        print "double clicked multieasycode"
+        print "- mande manao anlay requete lava b amzai"
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        self.campagne = self.combo_box__campagne.currentText()
+        self.multieasycode = self.qtlist_multieasycode.\
+            currentItem().\
+            text()
+
+
+        # dans double_clicked_multieasycode
+        ##requete ##query
+        req = "SELECT substring(time_stamp, 1, 4) "\
+            +"+ '\\' + substring(time_stamp, 5, 2) "\
+            +"+ '\\' + substring(time_stamp, 7, 2) "\
+            +"+ '\\' + substring(time_stamp, 9, 2) "\
+            +"+ '\\' + substring(time_stamp, 11, 2) "\
+            +"+ '\\' + substring(time_stamp, 13, 5) "\
+            +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
+            +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+            + "easy.dbo."\
+            +self.campagne\
+            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
+            + self.campagne \
+            + ".easycode " \
+            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
+            +"INNER JOIN easy.dbo.call_thread " \
+            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
+            +"WHERE easy.dbo."\
+            +self.campagne \
+            + ".easycode = "\
+            +self.multieasycode +")"
+
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        print "requete dans double_clicked_multieasycode:"
+        print req
+        
+
+
+        
+        
+        self.conn_sql_server \
+            .execute_query(req)
+
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+
+        # dans double_clicked_multieasycode
+        
+        for row in self.conn_sql_server:
+            
+            self.list_monoeasycode.\
+                append(row['chemin'])
+
+        # esorina ni doublon ari triena
+        self.list_monoeasycode = list(set(self.list_monoeasycode))
+        self.list_monoeasycode = sorted(self.list_monoeasycode)
+
+        print self.list_monoeasycode
+        
+        # mameno anlay qtlist_monoeasycode   
+        # elem01... io no chemin ani am server
+        # # io mbola tsisy racine
+        # # ex: 2017\\06\\23\\12\\05\\460003e0aa8c000001540594d04022591000f86e60001000003.wav
+        for elem01 in self.list_monoeasycode:
+            self.qtlist_monoeasycode.\
+                addItem(elem01)
+        
+
+        # fin double_clicked_multieasycode
+
+
+
 
 
     def sizeHint(self):
-        return QtCore.QSize(1000, 300)
+        return QtCore.QSize(1000, 500)
+
+
 
     def connect_sql_server(self, 
             server01 = '192.168.10.63',
@@ -94,13 +237,13 @@ class MainWindow(QtGui.QMainWindow):
             database=database01)
 
         if self.conn_sql_server :
-            print "connection ok!"
+            print "connection ok au sql_server!"
         else :
             print "connection au sql_server ECHOUEE"
 
+
     def extract01(self,
             query = ""):
-        
         self.conn_sql_server \
             .execute_query('SELECT * FROM persons01 WHERE salesrep=%s', 'salesrep01')
         
@@ -112,10 +255,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def double_click_qtlist_easycode(self):
         self.campagne = self.combo_box__campagne.currentText()
-        self.etat_comboS(
-            campagne = False,
-            call_date = False
-            )
+        
         req = "SELECT (time_stamp, 1, 4) "\
             +"+ '\\' + substring(time_stamp, 5, 2) "\
             +"+ '\\' + substring(time_stamp, 7, 2) "\
@@ -123,9 +263,7 @@ class MainWindow(QtGui.QMainWindow):
             +"+ '\\' + substring(time_stamp, 11, 2) "\
             +"+ '\\' + substring(time_stamp, 13, 2) "\
             +"+ rec_key + rec_time .codec FROM AVR7.dbo.recording WHERE "\
-            +"CONVERT(varchar(8), time_stamp) = '" \
-            + self.call_date \
-            + "' AND rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+            +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
             + "easy.dbo."\
             +self.campagne\
             +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
@@ -149,17 +287,76 @@ class MainWindow(QtGui.QMainWindow):
         
         print ""
 
-    def reinit_comboS(self):
+
         
-        self.etat_comboS(
-            campagne = True,
-            call_date = False
-            )
-        
-    def import_xls(self):
+    def msg_box_information(self, titre, txt):
+        QtGui.QMessageBox.information(
+                self, 
+                titre, 
+                txt
+                )
+
+
+    def select_chemin(self,
+            bool01 = True,
+            campagne = "CT_NOMINATION_AS3",
+            multieasy = "17868031"):
+        req = "SELECT substring(time_stamp, 1, 4) "\
+            +"+ '\\' + substring(time_stamp, 5, 2) "\
+            +"+ '\\' + substring(time_stamp, 7, 2) "\
+            +"+ '\\' + substring(time_stamp, 9, 2) "\
+            +"+ '\\' + substring(time_stamp, 11, 2) "\
+            +"+ '\\' + substring(time_stamp, 13, 5) "\
+            +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
+            +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+            + "easy.dbo."\
+            +campagne\
+            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
+            + campagne \
+            + ".easycode " \
+            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
+            +"INNER JOIN easy.dbo.call_thread " \
+            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
+            +"WHERE easy.dbo."\
+            +campagne \
+            + ".easycode = "\
+            +str(multieasy) +")"
+
+        print req
+
+        print ""
+        print ""
+        print ""
+        print "requete dans meth__select_chemin : "
+        print req
+        self.conn_sql_server \
+            .execute_query(req)
+
+        #dans select_chemin
+
+        plusieurs_monoeasy = []
+        for row in self.conn_sql_server:
+            plusieurs_monoeasy.\
+                append(row['chemin'])
+
+        return plusieurs_monoeasy
+        #fin select_chemin
+
+
+
+    def import_xls(self,
+            bool01 = True,
+            root_local = "E:\\DISK_D\\ecoutes", 
+            root_distant = "\\\\mcuci\\Storage$\\",
+            telechargee = "0",
+            fini = "0",
+            monoeasy = "17868031"
+        ):
         """
         ceci va retourner le Chemin du fichier.xlsx qu_on veut ajouter
         """
+        
+        self.remove_all_qtlist_multieasycode()
         files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Excel APPROPRIEE",
                 QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))
 
@@ -182,14 +379,229 @@ class MainWindow(QtGui.QMainWindow):
 
         
         # activer ceci si on accepte l_import de plusieurs fichiers
-        # for string in files:    # string va contenir le chemin du fichier que t_as parcourue
-        #     self.sources.append(Phonon.MediaSource(string)) # self.sources est une liste01.. afaik, il va contenir le playlist01
-            # string va contenir le chemin du fichier que t_as parcourue
-        #     print string
+            # for string in files:    # string va contenir le chemin du fichier que t_as parcourue
+            #     self.sources.append(Phonon.MediaSource(string)) # self.sources est une liste01.. afaik, il va contenir le playlist01
+                # string va contenir le chemin du fichier que t_as parcourue
+            #     print string
 
-        self.fichier_xlsx = files
-        print self.fichier_xlsx
 
+        tmp = files[0]
+        if tmp[-5:] == ".xlsx":
+            self.fichier_xlsx = tmp
+            print "fichier_xlsx: " + self.fichier_xlsx
+        else:
+            self.msg_box_information(
+                "ERREUR de Fichier",
+                "Votre fichier n'est pas un fichier excel CONVENABLE")
+
+        # self.lire_xlsx_campagne(
+            # fichier_xlsx = self.fichier_xlsx)
+
+        self.etat_elemS(
+            campg = True,
+            multieasyc = True,
+            monoeasyc = True,
+            dldd = True
+        )
+
+        book = open_workbook(
+            self.fichier_xlsx   
+        )
+
+        cheminS = self.select_chemin(
+            campagne = "CT_NOMINATION_AS3",
+            multieasy = "17868031"
+            );
+
+
+        
+        # sys.exit(0)
+
+
+        query_insert = "INSERT INTO " \
+            + "prj_ecoute01 "\
+            +"(chemin__a_partir_root, "\
+            +"root_local, root_distant, "\
+            +"telechargee, fini, multi_easycode) " +\
+            "VALUES " 
+            
+
+        #dans import_xls
+        sheet0 = book.sheet_by_index(0)
+        list_multieasycode = []
+        for i in range(0, sheet0.nrows):
+            multieasyc_i = sheet0.row_values(i, 0, 1)[0]
+            cheminS = self.select_chemin(
+                    campagne = "CT_NOMINATION_AS3",
+                    multieasy = multieasyc_i
+                    );
+
+            if i != (sheet0.nrows-1):
+                cpt_chm = 0
+                for chemin in cheminS:
+                    if cpt_chm != (len(cheminS) - 1):
+                        query_insert += "( '"
+                        query_insert += chemin + "', '" \
+                        + root_local + "', '"\
+                        + root_distant + "', '"\
+                        + telechargee + "', '"\
+                        + fini + "', "\
+                        + str(int(multieasyc_i)) + "), "
+                    else:
+                        query_insert += "( '"
+                        query_insert += chemin + "', '" \
+                        + root_local + "', '"\
+                        + root_distant + "', '"\
+                        + telechargee + "', '"\
+                        + fini + "', "\
+                        + str(int(multieasyc_i)) + "), "
+                    cpt_chm = cpt_chm + 1
+
+                print ""
+                print ""
+                print ""
+                print ""
+                print ""
+                print "query_insert dans import_xls __code__0001: " + query_insert
+
+
+                list_multieasycode.append(
+                    multieasyc_i
+                    )
+            else:
+
+                cpt_chm = 0
+                for chemin in cheminS:
+                    if cpt_chm != (len(cheminS) - 1):
+                        query_insert += "( '"
+                        query_insert += chemin + "', '" \
+                        + root_local + "', '"\
+                        + root_distant + "', '"\
+                        + telechargee + "', '"\
+                        + fini + "', "\
+                        + str(int(multieasyc_i)) + "), "
+                    else:
+                        query_insert += "( '"
+                        query_insert += chemin + "', '" \
+                        + root_local + "', '"\
+                        + root_distant + "', '"\
+                        + telechargee + "', '"\
+                        + fini + "', "\
+                        + str(int(multieasyc_i)) + ") "
+                    cpt_chm = cpt_chm + 1
+
+                print ""
+                print ""
+                print ""
+                print ""
+                print ""
+                print "query_insert dans import_xls __code__0001: " + query_insert
+
+                list_multieasycode.append(
+                    multieasyc_i
+                    )
+
+
+        print "query_insert dans import_xls __code002__: " + query_insert
+        self.cursor_pg.execute(query_insert)
+
+
+        self.connect_pg.commit()
+
+        # self.conn_sql_server \
+            # .execute_query(query_insert)
+
+        #dans import_xls
+        # on elimine les doublons
+        list_multieasycode = list(
+            set(
+                list_multieasycode
+            )
+        )
+
+        # on fait un tri
+        list_multieasycode = sorted(list_multieasycode)
+
+
+
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        # print list_multieasycode
+        
+        # elem sera un mono_easycode
+        for elem in list_multieasycode:
+            if (str(elem)[-2:] == ".0"):
+                self.qtlist_multieasycode.\
+                    addItem(str(elem)[:-2])
+            else:
+                self.qtlist_multieasycode.\
+                    addItem(str(elem))
+
+        
+        ######eto
+        # ao am meth__import_xls
+        # # manao ajout ani anaty table(prj_ecoute01) fona ni appli refa
+        # # manao import_fichier.xlsx
+        # #
+        # #
+        # # atov we
+        # # # mnw test ani am table loon.... ka rah tsy ao ni easycode01
+        # # # amzai vao mnw insertion any anaty table(prj_ecoute01)
+
+
+
+        #fin_import_xls
+
+
+
+    def check_existance_pg(self, 
+            bool01 = True, 
+            table01 = "prj_ecoute01", 
+            chp01 = "chemin__a_partir_root",
+            val = ' 2017\\06\\23\\12\\05\\460003e0aa8c000001540594d04022591000f86e60001000003.wav'):
+        req = "SELECT EXISTS" \
+            + "(SELECT * FROM " \
+            + table01 \
+            + " WHERE " \
+            + chp01 \
+            + " = '"\
+            + val \
+            + "');"
+        self.cursor_pg.execute(req)
+        rows = self.cursor_pg.fetchall()
+        print rows
+        if len(rows) != 0:
+            return True
+        else:
+            return False
+
+    def pg_insert(self, query):
+        self.cursor_pg.execute(query)
+        self.connect_pg.commit()
+
+    def connect_pg(self, 
+            server01 = '127.0.0.1',
+            user01='postgres',
+            password01='123456',
+            database01='saisie'):
+
+        self.connect_pg = psycopg2.connect(
+            "dbname=" + database01
+            +" user=" + user01
+            +" password=" + password01
+            +" host=" + server01
+        ) #local
+
+        self.connect_pg.set_isolation_level(0)
+
+        self.cursor_pg = self.connect_pg.cursor()
+
+        print "connection ok au postgresql"
+
+     
             
     def addFiles(self):
         files = QtGui.QFileDialog.getOpenFileNames(self, 
@@ -209,10 +621,6 @@ class MainWindow(QtGui.QMainWindow):
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
 
-    def etat_comboS(self, 
-            campagne = True,
-            call_date = False):
-        self.combo_box__campagne.setEnabled(campagne)
 
     
 
@@ -230,10 +638,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def selection_change_combo_campagne(self):  
         print "changed combo box of campagne"
-        self.etat_comboS(
-            campagne = False,
-            call_date = True
-            )
+        
 
         # print self.combo_box__campagne.currentText()
 
@@ -241,18 +646,30 @@ class MainWindow(QtGui.QMainWindow):
             self.lire_xlsx__get_call_date(
                 campgn = self.combo_box__campagne.currentText())
 
+        self.etat_elemS(
+            campg = False,
+            multieasyc = True,
+            monoeasyc = False,
+            dldd = True
+        )
+
         print self.combo_box__campagne.currentText()
         print "#####################################"
         print list_call_date01
         list_call_date01 = list(set(list_call_date01))
         list_call_date01 = sorted(list_call_date01)
-        
-        
-        # self.lire_xlsx__get_call_date(
-            # campgn = str(
-                # self.combo_box__campagne.currentText()
-                # )
-            # )
+
+        # print list_call_date01
+        for a in list_call_date01 :
+            if (str(a)[-2:] == ".0"):
+                self.qtlist_multieasycode.\
+                    addItem(str(a)[:-2])
+            else:
+                self.qtlist_multieasycode.\
+                    addItem(str(a))
+
+
+
 
     def addFiles01(self):
         files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Audio",
@@ -278,22 +695,16 @@ class MainWindow(QtGui.QMainWindow):
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
 
-    def click_play_audio(self):
-        print "PLAY_audio si on clique"
+
+        
+                
+
 
     def lire_xls_csv(self):
-        self.lire_xlsx()
-        # print
-        # print
-        # print
-        # print
-        # print "#################################"
-        # print
-        # print
-        # print
-        # print
-        # print
-        # self.lire_csv()
+        self.campagne = self.combo_box__campagne\
+            .currentItem()\
+            .text()
+        print ""
 
 
     def lire_csv(self):
@@ -340,7 +751,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
         # print "liste campagne:"
-        # print list_campagnes
+        print list_campagnes
         # print
         return list_campagnes
         
@@ -414,14 +825,38 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable.selectRow(
             self.sources.index(source)
         )
-        
-        # ajouteed
-        # self.musicTable02.selectRow(
-        #     self.sources.index(source)
-        # )
-
         self.timeLcd.display('00:00')
-        # remote_file01 = "\\mcuci\\Storage$\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav",
+        
+
+    def samba_check_file(self,
+            bool01 = True,  # franchement tsy haiko ni dikanito.. misi anio bool01 io maro2 aah
+            samba_server_storage = "\\\\mcuci\\Storage$",
+            remote_file = "\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav"):
+        from pathlib import Path
+        
+        path_to_file = samba_server_storage + remote_file
+
+        # testena ao am storage
+        my_file = Path(path_to_file)
+        if my_file.is_file():
+            print "ao am storage"
+        else:
+            samba_server_voice = "\\\\192.168.10.19\\voice"
+            path_to_file = samba_server_voice + remote_file
+            my_file = Path(path_to_file)
+            if my_file.is_file():
+                print "ao am voice"
+            else:
+                print "fichier inexistant"
+
+
+        return my_file.is_file()
+
+        # os.system()
+
+
+        print ""
+
 
     def changed_campagne(self):
         print "changed campagne"
@@ -434,8 +869,7 @@ class MainWindow(QtGui.QMainWindow):
 
         print "clicked test"
         # sys.exit(0)
-        import os
-        import os.path
+        
         if (os.path.exists(sauvegardee_dans)):
             print "fichier: " + sauvegardee_dans + " existe dans votre ordi"
             sys.exit(0)
@@ -511,14 +945,7 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable.setItem(currentRow, 2, albumItem)
         self.musicTable.setItem(currentRow, 3, yearItem)
 
-        # ajouteed
-        # currentRow = self.musicTable.rowCount()
-        # self.musicTable02.insertRow(currentRow)
-        # self.musicTable02.setItem(currentRow, 0, titleItem)
-        # self.musicTable02.setItem(currentRow, 1, artistItem)
-        # self.musicTable02.setItem(currentRow, 2, albumItem)
-        # self.musicTable02.setItem(currentRow, 3, yearItem)
-
+        
         if not self.musicTable.selectedItems():
             self.musicTable.selectRow(0)
             self.mediaObject.setCurrentSource(self.metaInformationResolver.currentSource())
@@ -538,6 +965,19 @@ class MainWindow(QtGui.QMainWindow):
             self.musicTable.resizeColumnsToContents()
             if self.musicTable.columnWidth(0) > 300:
                 self.musicTable.setColumnWidth(0, 300)
+
+    def remove_all_qtlist_multieasycode(self):
+        # print self.qtlist_multieasycode.count()
+        for i in xrange(self.qtlist_multieasycode.count()):
+            # ne comprend pas pourquoi si on fait qu_une seule fois
+            # # la prochaine_ligne, alors on va supprimer que la moitiee
+            self.qtlist_multieasycode.takeItem(i)
+            self.qtlist_multieasycode.takeItem(i)
+            self.qtlist_multieasycode.takeItem(i)
+            self.qtlist_multieasycode.takeItem(i)
+            self.qtlist_multieasycode.takeItem(i)
+            self.qtlist_multieasycode.takeItem(i)
+
 
 
     def lire_xlsx__get_call_date(self, 
@@ -582,7 +1022,8 @@ class MainWindow(QtGui.QMainWindow):
             self, 
             shortcut="Ctrl+P", 
             enabled=False,
-            triggered=self.mediaObject.play
+            # triggered=self.mediaObject.play
+            triggered=self.clicked_play_action
         )
 
 
@@ -594,18 +1035,9 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.import_xls
         )
 
-        # self.bouton_extraire_audio = QtGui.QAction(
-        #     "Importer",
-        #     self, 
-        #     shortcut="Ctrl+P", 
-        #     enabled=True,
-        #     triggered=self.extraire_audio
-        # )
 
-        self.bouton_extraire_audio = QtGui.QPushButton(
-            "Extraire"
-        )
-        self.bouton_reinit_comboS = QtGui.QPushButton(
+
+        self.bouton_reinit_elemS = QtGui.QPushButton(
             "Reinitialiser"
         )
 
@@ -613,10 +1045,8 @@ class MainWindow(QtGui.QMainWindow):
             "Test"
         )
 
-        # self.bouton_extraire_audio.clicked.connect(self.click_extraire_audio)
-        self.bouton_extraire_audio.clicked.connect(self.lire_xls_csv)
-        self.bouton_reinit_comboS.clicked.connect(
-            self.reinit_comboS
+        self.bouton_reinit_elemS.clicked.connect(
+            self.remove_all_qtlist_multieasycode
             # (
                 # text01 = "akondro"
             # )
@@ -624,14 +1054,19 @@ class MainWindow(QtGui.QMainWindow):
         self.bouton_test.clicked.connect(
             # self.dl_fichier ## bouton_test_dl
             # self.select_fichier_dl
-            self.del01
+            # self.remove_all_qtlist_multieasycode
+            # self.samba_check_file
+            # self.extract01  # that one is going to extract some BASIC info from sql_server
+                            # # you should delete that one
+            # self.umount_samba_server
+            # self.lire_xlsx_campagne 
+            self.dialog_monoeasycode
+            # self.check_existance_pg
         )
 
         self.bouton_play_audio = QtGui.QPushButton(
             "Jouer"
         )
-
-        self.bouton_play_audio.clicked.connect(self.click_play_audio)
 
         self.pauseAction = QtGui.QAction(
             self.style().standardIcon(
@@ -692,6 +1127,7 @@ class MainWindow(QtGui.QMainWindow):
             triggered=QtGui.qApp.aboutQt
         )
 
+
     def method01(self):
         print "this is a test"
 
@@ -706,6 +1142,100 @@ class MainWindow(QtGui.QMainWindow):
         aboutMenu = self.menuBar().addMenu("&Aide")
         aboutMenu.addAction(self.aboutAction)
         aboutMenu.addAction(self.aboutQtAction)
+
+
+    def dialog_monoeasycode(self, 
+            bool01 = True,
+            list__dl_fini_chemin_easycode
+            = 
+            [
+                [False, True, 'chemin01', 'easycode01'],
+                [True, False, 'chemin02', 'easycode02'],
+                [True, False, 'chemin03', 'easycode03'],
+                [False, True, 'chemin04', 'easycode04'],
+                [True, True, 'chemin05', 'easycode05'],
+            ]
+        ):
+
+        # misi requete insertion
+
+        # misi requete update
+
+        # #instanciation inside dialog
+        dialog01 = QtGui.QDialog()
+        qvbox_layout_dialog = QtGui.QHBoxLayout(dialog01)
+        
+        button01 = QtGui.QPushButton("ok", dialog01)
+
+
+        rows = len(list__dl_fini_chemin_easycode)
+        cols = len(list__dl_fini_chemin_easycode[0])
+        self.qtable01 = QtGui.QTableWidget(rows, cols, dialog01)
+        self.qtable01.setSelectionBehavior(QtGui.QTableView.SelectRows);
+
+        dialog01.setMinimumSize(600, 50)
+        self.qtable01.setStyleSheet(
+            '''
+            QTableWidget { max-width: 600px; min-height: 200px;}
+            '''
+            )
+        qvbox_layout_dialog.addWidget(button01)
+        qvbox_layout_dialog.addWidget(self.qtable01)
+
+        # les entetes du table_dialog
+        self.qtable01.setHorizontalHeaderLabels(
+            ['Download', 'Fini', 'Chemin', 'Easycode'])
+
+        self.qtable01.doubleClicked.connect(self.double_clicked_qtable01)
+
+        for row in range(len(list__dl_fini_chemin_easycode)):
+            for col in range(len(list__dl_fini_chemin_easycode[row])):
+                
+                if col == 0:
+                    # Download
+                    item = QtGui.QTableWidgetItem('')
+                    if(list__dl_fini_chemin_easycode[row][col] == False):
+                        item.setCheckState(QtCore.Qt.Unchecked)
+                        item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                    else:
+                        item.setCheckState(QtCore.Qt.Checked)
+                        item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                    self.qtable01.setItem(row, col, item)
+
+                elif col == 1:
+                    # Fini
+                    item = QtGui.QTableWidgetItem()
+                    if(list__dl_fini_chemin_easycode[row][col] == False):
+                        item.setCheckState(QtCore.Qt.Unchecked)
+                        item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                    else:
+                        item.setCheckState(QtCore.Qt.Checked)
+                        item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                    
+                    self.qtable01.setItem(row, col, item)
+
+                elif col == 2:
+                    # Chemin
+                    item = QtGui.QTableWidgetItem(
+                        list__dl_fini_chemin_easycode[row][col]
+                    )
+                    # item.setCheckState(QtCore.Qt.Unchecked)
+                    self.qtable01.setItem(row, col, item)
+                elif col == 3:
+                    item = QtGui.QTableWidgetItem(
+                        list__dl_fini_chemin_easycode[row][col]
+                    )
+                    self.qtable01.setItem(row, col, item)
+
+
+        dialog01.setWindowTitle("Dialog")
+        dialog01.setWindowModality(QtCore.Qt.ApplicationModal)
+        dialog01.exec_()
+
+    def clicked_button_dialog(self):
+        print "clicked button inside dialog"
+
+
 
     def setupUi(self):
         bar = QtGui.QToolBar()
@@ -737,55 +1267,59 @@ class MainWindow(QtGui.QMainWindow):
         headers = ("Title", "Artist", "Album", "Year")
         # headers = ("Title", "Titre01", "Titre02", "Titre03")
 
-        self.musicTable = QtGui.QTableWidget(0, 4)
-        self.musicTable01 = QtGui.QTableWidget(0, 4)
-        self.musicTable02 = QtGui.QTableWidget(0, 4)
 
-        self.musicTable01.setItem(0,0, QtGui.QTableWidgetItem("Item (1,1)"))
-        self.musicTable01.setItem(0,1, QtGui.QTableWidgetItem("Item (1,2)"))
-        self.musicTable01.setItem(1,0, QtGui.QTableWidgetItem("Item (2,1)"))
-        self.musicTable01.setItem(1,1, QtGui.QTableWidgetItem("Item (2,2)"))
-        self.musicTable01.setItem(2,0, QtGui.QTableWidgetItem("Item (3,1)"))
-        self.musicTable01.setItem(2,1, QtGui.QTableWidgetItem("Item (3,2)"))
-        self.musicTable01.setItem(3,0, QtGui.QTableWidgetItem("Item (4,1)"))
-        self.musicTable01.setItem(3,1, QtGui.QTableWidgetItem("Item (4,2)"))
-        self.musicTable01.show()
+        
+
+
+        #~ #instanciation by default
+
+        self.musicTable = QtGui.QTableWidget(0, 4)
+        
         
         self.combo_box__campagne = QtGui.QComboBox()
 
-        self.qtlist_campagne = QtGui.QListWidget()
-        self.qtlist_campagne.addItem("campagne01")
-        self.qtlist_campagne.addItem("campagne02")
-        self.qtlist_campagne.addItem("campagne03")
-        self.qtlist_campagne.addItem("campagne04")
-        self.qtlist_campagne.addItem("campagne05")
-        self.qtlist_campagne.addItem("campagne06")
-        self.qtlist_campagne.addItem("campagne07")
-        self.qtlist_campagne.addItem("campagne08")
-        self.qtlist_campagne.addItem("campagne09")
-        self.qtlist_campagne.addItem("campagne10")
-        self.qtlist_campagne.addItem("campagne11")
-       
-
-        self.qtlist_campagne.\
-            currentItemChanged.\
-            connect(self.changed_campagne)
+        self.qtlist_dldd = QtGui.QListWidget()
         
+
+        self.qtlist_multieasycode = QtGui.QListWidget()
+        self.qtlist_multieasycode.setStyleSheet('''
+            QListWidget { max-width: 150px; min-height: 200px;}
+            '''
+            )
+
+        self.qtlist_multieasycode.addItem("")
+
+        self.qtlist_monoeasycode = QtGui.QListWidget()
+        
+
+        self.combo_box__campagne.setStyleSheet('''
+            QComboBox { max-width: 100px; min-height: 20px;}
+            '''
+            )
+
+
+
         self.combo_box__campagne.addItems(
             # ["campagne01", "campagne02", "campagne03"]
             self.lire_xlsx_campagne()
         )
+
+        #~ ##liaison des elem_graphique avec meth01
         self.combo_box__campagne.\
             currentIndexChanged.\
             connect(
                 self.selection_change_combo_campagne
             )
 
+
+
+
         
-        self.combo_box__campagne.setStyleSheet('''
-            QComboBox { max-width: 100px; min-height: 20px;}
-            '''    
-            )
+        self.qtlist_multieasycode.\
+            itemDoubleClicked.\
+            connect(self.double_clicked_multieasycode)
+
+        
 
 
         
@@ -802,14 +1336,8 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable.setSelectionMode(
             QtGui.QAbstractItemView.SingleSelection
         )
-        self.musicTable01.setHorizontalHeaderLabels(headers)
-        self.musicTable01.setSelectionMode(
-            QtGui.QAbstractItemView.SingleSelection
-        )
-        self.musicTable02.setHorizontalHeaderLabels(headers)
-        self.musicTable02.setSelectionMode(
-            QtGui.QAbstractItemView.SingleSelection
-        )
+        
+        
 
         self.musicTable.setSelectionBehavior(
             QtGui.QAbstractItemView.SelectRows
@@ -848,15 +1376,15 @@ class MainWindow(QtGui.QMainWindow):
         mainLayout = QtGui.QVBoxLayout()
         qvbox_layout_music_table01 = QtGui.QHBoxLayout()
         qvbox_layout_music_table02 = QtGui.QHBoxLayout()
+        
 
 
         qvbox_layout_music_table01.addWidget(self.combo_box__campagne)
-        qvbox_layout_music_table01.addWidget(self.qtlist_campagne)
-        qvbox_layout_music_table01.addWidget(self.musicTable01)
-        qvbox_layout_music_table01.addWidget(self.bouton_extraire_audio)
-        qvbox_layout_music_table01.addWidget(self.bouton_reinit_comboS)
+        qvbox_layout_music_table01.addWidget(self.qtlist_multieasycode)
+        # qvbox_layout_music_table01.addWidget(self.qtlist_monoeasycode)
+        qvbox_layout_music_table01.addWidget(self.bouton_reinit_elemS)
 
-        qvbox_layout_music_table02.addWidget(self.musicTable02)
+        qvbox_layout_music_table02.addWidget(self.qtlist_dldd)
         qvbox_layout_music_table02.addWidget(self.bouton_test)
         qvbox_layout_music_table02.addWidget(self.bouton_play_audio)
 

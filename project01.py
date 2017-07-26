@@ -104,15 +104,30 @@ class MainWindow(QtGui.QMainWindow):
         self.sources.append(Phonon.MediaSource(
             "E:\DISK_D\mamitiana\zik\Nouveau dossier\Rabl - Ra fitia.mp3"
             ))
-
-
-            
+ 
         index = len(self.sources)
         print "index: " + str(index)
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
 
-        
+        indexes = self.qtable01.selectionModel().selectedRows()
+
+        print "index024689361: " 
+
+        chem_fichier
+
+        print indexes
+        for index in sorted(indexes):
+            print('Row %d is selected' % index.row())
+            print self.list__dl_fini_chemin_easycode[index.row()][2]
+        ######eto
+        # rhf m_click anlay item ao am item@qtable01 dia 
+        # # m_dl
+        # # # testena loon we aiz no misi anlay fichier tkn dl_na
+        # # # sauvena qlq_part ilai fichier__n_telechargena
+        # # # alefa ani am self.source ilai fichier__n_telechargena
+        # # manao anlai play ao am n_telechargena
+
 
     def mount_samba_server(self):
         '''
@@ -126,6 +141,14 @@ class MainWindow(QtGui.QMainWindow):
         print "samba_Storage mounted"
         print "mount samba server"
 
+
+    # attention au 
+    def pg_select(self,
+            query = "select * from prj_ecoute01"):
+        self.cursor_pg.execute(query)
+        self.rows_pg = self.cursor_pg.fetchall()
+
+        print "pg_select _ code 000012654564"
 
 
     def double_clicked_multieasycode(self):
@@ -144,26 +167,45 @@ class MainWindow(QtGui.QMainWindow):
 
         # dans double_clicked_multieasycode
         ##requete ##query
-        req = "SELECT substring(time_stamp, 1, 4) "\
-            +"+ '\\' + substring(time_stamp, 5, 2) "\
-            +"+ '\\' + substring(time_stamp, 7, 2) "\
-            +"+ '\\' + substring(time_stamp, 9, 2) "\
-            +"+ '\\' + substring(time_stamp, 11, 2) "\
-            +"+ '\\' + substring(time_stamp, 13, 5) "\
-            +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
-            +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
-            + "easy.dbo."\
-            +self.campagne\
-            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
-            + self.campagne \
-            + ".easycode " \
-            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
-            +"INNER JOIN easy.dbo.call_thread " \
-            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
-            +"WHERE easy.dbo."\
-            +self.campagne \
-            + ".easycode = "\
-            +self.multieasycode +")"
+        # ti requete ti dia hnw requete ani am sql_server
+            # req = "SELECT substring(time_stamp, 1, 4) "\
+                # +"+ '\\' + substring(time_stamp, 5, 2) "\
+                # +"+ '\\' + substring(time_stamp, 7, 2) "\
+                # +"+ '\\' + substring(time_stamp, 9, 2) "\
+                # +"+ '\\' + substring(time_stamp, 11, 2) "\
+                # +"+ '\\' + substring(time_stamp, 13, 5) "\
+                # +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
+                # +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+                # + "easy.dbo."\
+                # +self.campagne\
+                # +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
+                # + self.campagne \
+                # + ".easycode " \
+                # +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
+                # +"INNER JOIN easy.dbo.call_thread " \
+                # +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
+                # +"WHERE easy.dbo."\
+                # +self.campagne \
+                # + ".easycode = "\
+                # +self.multieasycode +")"
+
+        # alaina aa partir ny: multieasycode, table_campagne
+        req = "SELECT " \
+        + "telechargee, " \
+        + "fini, " \
+        + "chemin__a_partir_root, " \
+        + "multi_easycode " \
+        + "root_local, " \
+        + "root_distant " \
+        + "FROM prj_ecoute01 " \
+        + "WHERE table_campagne like '" \
+        + self.combo_box__campagne.currentText() \
+        + "' AND " + "multi_easycode=" \
+        + self.qtlist_multieasycode.currentItem().text()
+
+        print "code654654654654: " 
+        print type(self.qtlist_multieasycode.currentItem().text())
+        
 
         print ""
         print ""
@@ -172,14 +214,62 @@ class MainWindow(QtGui.QMainWindow):
         print ""
         print "requete dans double_clicked_multieasycode:"
         print req
-        
 
 
-        
-        
-        self.conn_sql_server \
-            .execute_query(req)
 
+        self.pg_select(query = req)
+        print "printing row"
+        print ""
+        print ""
+        print ""
+        print ""
+
+        # le double_t suivant est fait par expres
+        listt__dl_fini_chemin_easycode = [] * (len(self.rows_pg))
+        # listt__dl_fini_chemin_easycode = [[] for x in xrange(len(self.rows_pg))]
+        
+        
+        for row in self.rows_pg:
+            list01 = [None] * (len(row))
+            for i in range(len(row)):
+                if i == 0:
+                    # download
+                    # testena we 0 v ny row[i]
+                    if row[i] == 0:
+                        list01[i] = False
+                    else:
+                        list01[i] = True
+                elif i == 1:
+                    # fini
+                    if row[i] == 0:
+                        list01[i] = False
+                    else:
+                        list01[i] = True
+                else:
+                    list01[i] = row[i]
+                
+            print "qsdmlkfjqsmldfkjqsdlmfkj: "
+            print list01
+            listt__dl_fini_chemin_easycode.append(list01)
+        # sys.exit(0)
+            
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        print ""
+        print "test000011"
+        print listt__dl_fini_chemin_easycode
+        # sys.exit(0)
+
+
+        self.list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
+        self.dialog_monoeasycode(
+            list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
+            )
+        
+        
         print ""
         print ""
         print ""
@@ -189,27 +279,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # dans double_clicked_multieasycode
         
-        for row in self.conn_sql_server:
-            
-            self.list_monoeasycode.\
-                append(row['chemin'])
-
-        # esorina ni doublon ari triena
-        self.list_monoeasycode = list(set(self.list_monoeasycode))
-        self.list_monoeasycode = sorted(self.list_monoeasycode)
-
-        print self.list_monoeasycode
         
-        # mameno anlay qtlist_monoeasycode   
-        # elem01... io no chemin ani am server
-        # # io mbola tsisy racine
-        # # ex: 2017\\06\\23\\12\\05\\460003e0aa8c000001540594d04022591000f86e60001000003.wav
-        for elem01 in self.list_monoeasycode:
-            self.qtlist_monoeasycode.\
-                addItem(elem01)
-        
-
-        # fin double_clicked_multieasycode
+        # fin double_clicked_multieasycode "TRAITES"
 
 
 
@@ -299,7 +370,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def select_chemin(self,
             bool01 = True,
-            campagne = "CT_NOMINATION_AS3",
+            table_campagne = "CT_NOMINATION_AS3",
             multieasy = "17868031"):
         req = "SELECT substring(time_stamp, 1, 4) "\
             +"+ '\\' + substring(time_stamp, 5, 2) "\
@@ -310,15 +381,15 @@ class MainWindow(QtGui.QMainWindow):
             +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
             +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
             + "easy.dbo."\
-            +campagne\
+            +table_campagne\
             +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
-            + campagne \
+            + table_campagne \
             + ".easycode " \
             +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
             +"INNER JOIN easy.dbo.call_thread " \
             +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
             +"WHERE easy.dbo."\
-            +campagne \
+            +table_campagne \
             + ".easycode = "\
             +str(multieasy) +")"
 
@@ -346,20 +417,24 @@ class MainWindow(QtGui.QMainWindow):
 
     def import_xls(self,
             bool01 = True,
-            root_local = "E:\\DISK_D\\ecoutes", 
+            root_local = "E:\\DISK_D\\ecoutes\\", 
             root_distant = "\\\\mcuci\\Storage$\\",
             telechargee = "0",
             fini = "0",
             monoeasy = "17868031"
         ):
+
+        self.root_local = root_local
+        self.root_distant = root_distant
         """
         ceci va retourner le Chemin du fichier.xlsx qu_on veut ajouter
         """
         
+        # ndr1ndr1 refa atao indrepani ftsn ti d 
+        self.remove_all_qtlist_multieasycode()
         self.remove_all_qtlist_multieasycode()
         files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Excel APPROPRIEE",
                 QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))
-
         if not files:
             return
 
@@ -375,7 +450,8 @@ class MainWindow(QtGui.QMainWindow):
                 "- Veuillez choisir qu'une seule fichier"
                 )
             # raw_input("")
-            sys.exit(0)
+            # on a importer un fichier NON_xlsx
+            return
 
         
         # activer ceci si on accepte l_import de plusieurs fichiers
@@ -408,34 +484,91 @@ class MainWindow(QtGui.QMainWindow):
             self.fichier_xlsx   
         )
 
-        cheminS = self.select_chemin(
-            campagne = "CT_NOMINATION_AS3",
-            multieasy = "17868031"
-            );
-
 
         
-        # sys.exit(0)
+
+
+        # mnw anle drop_table
+        drop_query = "DROP TABLE IF EXISTS prj_ecoute01;"
+        self.pg_not_select(drop_query)
+        print "table: prj_ecoute01 est EFFACEE"
+
+
+
+        # mnw anle creation_table
+        create_query = "CREATE TABLE "\
+            +"prj_ecoute01 " \
+            +"(" \
+            +"id_ecoute INTEGER NOT NULL DEFAULT NEXTVAL(('public.prj_ecoute01_seq'::text)::regclass)," \
+            + "chemin__a_partir_root CHARACTER VARYING(254)," \
+            + "root_local CHARACTER VARYING(128)," \
+            + "root_distant CHARACTER VARYING(128)," \
+            + "table_campagne CHARACTER VARYING(128)," \
+            + "telechargee SMALLINT," \
+            + "fini SMALLINT," \
+            + "multi_easycode INTEGER," \
+            + "mono_easycode INTEGER"  \
+            +")"
+
+
+        self.pg_not_select(create_query)
+        print "table: prj_ecoute01 est CREEE"
+
+        
+
+        # mnw test we aiz no misi anlai fichier
+
+
+
+        # manomboka eto dia : Formation de la requete_insert
+
 
 
         query_insert = "INSERT INTO " \
             + "prj_ecoute01 "\
             +"(chemin__a_partir_root, "\
             +"root_local, root_distant, "\
-            +"telechargee, fini, multi_easycode) " +\
+            +"telechargee, fini, "\
+            +"multi_easycode, table_campagne) " +\
             "VALUES " 
             
 
         #dans import_xls
         sheet0 = book.sheet_by_index(0)
         list_multieasycode = []
-        for i in range(0, sheet0.nrows):
-            multieasyc_i = sheet0.row_values(i, 0, 1)[0]
-            cheminS = self.select_chemin(
-                    campagne = "CT_NOMINATION_AS3",
-                    multieasy = multieasyc_i
-                    );
 
+        # alaina ts1r1 ny multi_easycode izai ani am fichier.xlsx
+        # ni multi_easycode=multieasyc_i dia mety manana enregistrement maro2
+        for i in range(0, sheet0.nrows):
+
+
+            # multieasyc_i dia meti manana enregistrement maro2
+            multieasyc_i = sheet0.row_values(i, 0, 1)[0]
+
+            # sys.exit(0)
+            cheminS = self.select_chemin(
+                table_campagne = self.combo_box__campagne.currentText(),
+                multieasy = str(multieasyc_i)[:-2]
+            );
+            # pour verifier que multieasyc_i est present
+                # if (
+                        # self.check_existance_pg_int (
+                            # table01 = "prj_ecoute01",
+                            # chp01 = "multi_easycode",
+                            # val = multieasyc_i
+                        # ) == False
+                    # ):
+                    # print "Tsy ao: " + str(multieasyc_i)
+                # else:
+                    # print "AO tsara: " + str(multieasyc_i)
+
+            # multieasyc_i dia meti manana enregistrement maro2
+            # # ireto manaraka ireto ni chemin maka ani am enregistrement an_i easycode irai
+            
+
+            # sarotsarotra azavaina ti aah!
+            # hafa ni requete rah ohatra ka ani am farani n easycode ani am 
+            # # fichier.xlsx no jerena ni enregistrement
             if i != (sheet0.nrows-1):
                 cpt_chm = 0
                 for chemin in cheminS:
@@ -446,7 +579,9 @@ class MainWindow(QtGui.QMainWindow):
                         + root_distant + "', '"\
                         + telechargee + "', '"\
                         + fini + "', "\
-                        + str(int(multieasyc_i)) + "), "
+                        + str(int(multieasyc_i)) + ", '" \
+                        + self.combo_box__campagne.currentText()\
+                        + "'), "
                     else:
                         query_insert += "( '"
                         query_insert += chemin + "', '" \
@@ -454,7 +589,9 @@ class MainWindow(QtGui.QMainWindow):
                         + root_distant + "', '"\
                         + telechargee + "', '"\
                         + fini + "', "\
-                        + str(int(multieasyc_i)) + "), "
+                        + str(int(multieasyc_i)) + ", '"\
+                        + self.combo_box__campagne.currentText()\
+                        + "'), "
                     cpt_chm = cpt_chm + 1
 
                 print ""
@@ -479,7 +616,9 @@ class MainWindow(QtGui.QMainWindow):
                         + root_distant + "', '"\
                         + telechargee + "', '"\
                         + fini + "', "\
-                        + str(int(multieasyc_i)) + "), "
+                        + str(int(multieasyc_i)) + ", '"\
+                        + self.combo_box__campagne.currentText()\
+                        + "'), "
                     else:
                         query_insert += "( '"
                         query_insert += chemin + "', '" \
@@ -487,7 +626,9 @@ class MainWindow(QtGui.QMainWindow):
                         + root_distant + "', '"\
                         + telechargee + "', '"\
                         + fini + "', "\
-                        + str(int(multieasyc_i)) + ") "
+                        + str(int(multieasyc_i)) + ", '"\
+                        + self.combo_box__campagne.currentText()\
+                        + "') "
                     cpt_chm = cpt_chm + 1
 
                 print ""
@@ -495,7 +636,7 @@ class MainWindow(QtGui.QMainWindow):
                 print ""
                 print ""
                 print ""
-                print "query_insert dans import_xls __code__0001: " + query_insert
+                print "query_insert dans import_xls __code__005874: " + query_insert
 
                 list_multieasycode.append(
                     multieasyc_i
@@ -503,9 +644,13 @@ class MainWindow(QtGui.QMainWindow):
 
 
         print "query_insert dans import_xls __code002__: " + query_insert
+
+
+
+        # ty tsy olana fa ilai fanamboarana anlai requete no enjana
         self.cursor_pg.execute(query_insert)
 
-
+        # eto ni mnw insertion
         self.connect_pg.commit()
 
         # self.conn_sql_server \
@@ -540,24 +685,42 @@ class MainWindow(QtGui.QMainWindow):
                 self.qtlist_multieasycode.\
                     addItem(str(elem))
 
-        
-        ######eto
-        # ao am meth__import_xls
-        # # manao ajout ani anaty table(prj_ecoute01) fona ni appli refa
-        # # manao import_fichier.xlsx
-        # #
-        # #
-        # # atov we
-        # # # mnw test ani am table loon.... ka rah tsy ao ni easycode01
-        # # # amzai vao mnw insertion any anaty table(prj_ecoute01)
-
 
 
         #fin_import_xls
 
 
+    def check_existance_pg_int(self,
+        bool01 = True, 
+            table01 = "prj_ecoute01", 
+            chp01 = "chemin__a_partir_root",
+            val = '2017\\06\\23\\12\\05\\460003e0aa8c000001540594d04022591000f86e60001000003.wav'
+        ):
+        req = "SELECT EXISTS" \
+            + "(SELECT * FROM " \
+            + table01 \
+            + " WHERE " \
+            + chp01 \
+            + " = "\
+            + str(val) \
+            + ");"
+        res = True
+        self.cursor_pg.execute(req)
+        rows = self.cursor_pg.fetchall()
+        # print rows
+        if len(rows) != 0:
+            res = True
+        else:
+            res = False
 
-    def check_existance_pg(self, 
+        print "resultat0564614: " + str(res)
+        return res
+
+    def clicked_bouton_fermer_dialog(self):
+        self.dialog01.close()
+        print "this is from the dialog"
+
+    def check_existance_pg_str(self, 
             bool01 = True, 
             table01 = "prj_ecoute01", 
             chp01 = "chemin__a_partir_root",
@@ -568,17 +731,24 @@ class MainWindow(QtGui.QMainWindow):
             + " WHERE " \
             + chp01 \
             + " = '"\
-            + val \
+            + str(val) \
             + "');"
+        res = True
         self.cursor_pg.execute(req)
         rows = self.cursor_pg.fetchall()
-        print rows
+        # print rows
         if len(rows) != 0:
-            return True
+            res = True
         else:
-            return False
+            res = False
 
-    def pg_insert(self, query):
+        print "resultat0564614: " + str(res)
+        return res
+
+
+
+
+    def pg_not_select(self, query):
         self.cursor_pg.execute(query)
         self.connect_pg.commit()
 
@@ -660,13 +830,13 @@ class MainWindow(QtGui.QMainWindow):
         list_call_date01 = sorted(list_call_date01)
 
         # print list_call_date01
-        for a in list_call_date01 :
-            if (str(a)[-2:] == ".0"):
-                self.qtlist_multieasycode.\
-                    addItem(str(a)[:-2])
-            else:
-                self.qtlist_multieasycode.\
-                    addItem(str(a))
+        # for a in list_call_date01 :
+            # if (str(a)[-2:] == ".0"):
+                # self.qtlist_multieasycode.\
+                    # addItem(str(a)[:-2])
+            # else:
+                # self.qtlist_multieasycode.\
+                    # addItem(str(a))
 
 
 
@@ -1061,7 +1231,7 @@ class MainWindow(QtGui.QMainWindow):
             # self.umount_samba_server
             # self.lire_xlsx_campagne 
             self.dialog_monoeasycode
-            # self.check_existance_pg
+            # self.check_existance_pg_int
         )
 
         self.bouton_play_audio = QtGui.QPushButton(
@@ -1149,10 +1319,10 @@ class MainWindow(QtGui.QMainWindow):
             list__dl_fini_chemin_easycode
             = 
             [
-                [False, True, 'chemin01', 'easycode01'],
+                [False, True, 'chemin01', 'easycode04'],
                 [True, False, 'chemin02', 'easycode02'],
                 [True, False, 'chemin03', 'easycode03'],
-                [False, True, 'chemin04', 'easycode04'],
+                [False, True, 'chemin04', 'easycode01'],
                 [True, True, 'chemin05', 'easycode05'],
             ]
         ):
@@ -1162,24 +1332,26 @@ class MainWindow(QtGui.QMainWindow):
         # misi requete update
 
         # #instanciation inside dialog
-        dialog01 = QtGui.QDialog()
-        qvbox_layout_dialog = QtGui.QHBoxLayout(dialog01)
+        self.dialog01 = QtGui.QDialog()
+        qvbox_layout_dialog = QtGui.QHBoxLayout(self.dialog01)
         
-        button01 = QtGui.QPushButton("ok", dialog01)
+        self.button01 = QtGui.QPushButton("ok", self.dialog01)
+        self.button01.clicked.connect(self.clicked_bouton_fermer_dialog)
 
 
         rows = len(list__dl_fini_chemin_easycode)
         cols = len(list__dl_fini_chemin_easycode[0])
-        self.qtable01 = QtGui.QTableWidget(rows, cols, dialog01)
-        self.qtable01.setSelectionBehavior(QtGui.QTableView.SelectRows);
+        self.qtable01 = QtGui.QTableWidget(rows, cols, self.dialog01)
+        self.qtable01.setSelectionBehavior(QtGui.QTableView.SelectRows)
 
-        dialog01.setMinimumSize(600, 50)
+
+        self.dialog01.setMinimumSize(600, 50)
         self.qtable01.setStyleSheet(
             '''
             QTableWidget { max-width: 600px; min-height: 200px;}
             '''
             )
-        qvbox_layout_dialog.addWidget(button01)
+        qvbox_layout_dialog.addWidget(self.button01)
         qvbox_layout_dialog.addWidget(self.qtable01)
 
         # les entetes du table_dialog
@@ -1219,18 +1391,20 @@ class MainWindow(QtGui.QMainWindow):
                     item = QtGui.QTableWidgetItem(
                         list__dl_fini_chemin_easycode[row][col]
                     )
-                    # item.setCheckState(QtCore.Qt.Unchecked)
+                    item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
                     self.qtable01.setItem(row, col, item)
                 elif col == 3:
+                    # easycode
                     item = QtGui.QTableWidgetItem(
-                        list__dl_fini_chemin_easycode[row][col]
+                        str(list__dl_fini_chemin_easycode[row][col])
                     )
+                    item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
                     self.qtable01.setItem(row, col, item)
 
 
-        dialog01.setWindowTitle("Dialog")
-        dialog01.setWindowModality(QtCore.Qt.ApplicationModal)
-        dialog01.exec_()
+        self.dialog01.setWindowTitle("Dialog")
+        self.dialog01.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.dialog01.exec_()
 
     def clicked_button_dialog(self):
         print "clicked button inside dialog"

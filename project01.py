@@ -3,8 +3,10 @@ sip.setapi('QString', 2)
 import sys
 import os
 import os.path
+import time
 from subprocess import check_output
 import psycopg2
+from pathlib import Path
 
 from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui
@@ -72,6 +74,7 @@ class MainWindow(QtGui.QMainWindow):
             monoeasyc = True,
             dldd = True
         )
+
         self.timeLcd.display("00:00") 
 
         self.sources = []
@@ -101,9 +104,15 @@ class MainWindow(QtGui.QMainWindow):
     def double_clicked_qtable01(self):
         print "double clicked potato" 
         
-        self.sources.append(Phonon.MediaSource(
-            "E:\DISK_D\mamitiana\zik\Nouveau dossier\Rabl - Ra fitia.mp3"
-            ))
+        # ti mbl mnw telechargement FTSN
+        # mnw requete ani am pg we aiza no misi anlay 
+        # # full_path_read
+        # #
+        # # arakaraka ni self.clicked_enreg
+
+
+        
+        
  
         index = len(self.sources)
         print "index: " + str(index)
@@ -114,11 +123,11 @@ class MainWindow(QtGui.QMainWindow):
 
         print "index024689361: " 
 
-        chem_fichier
-
         print indexes
         for index in sorted(indexes):
             print('Row %d is selected' % index.row())
+            self.clicked_enreg = self.\
+                list__dl_fini_chemin_easycode[index.row()][2]
             print self.list__dl_fini_chemin_easycode[index.row()][2]
         ######eto
         # rhf m_click anlay item ao am item@qtable01 dia 
@@ -127,6 +136,47 @@ class MainWindow(QtGui.QMainWindow):
         # # # sauvena qlq_part ilai fichier__n_telechargena
         # # # alefa ani am self.source ilai fichier__n_telechargena
         # # manao anlai play ao am n_telechargena
+        req = "SELECT"\
+            +" root_distant, chemin__a_partir_root "\
+            +"FROM prj_ecoute01 "\
+            +"WHERE "\
+            +"chemin__a_partir_root "\
+            +"= '"\
+            +self.clicked_enreg\
+            +"';"
+        print req
+
+        self.pg_select(
+            query = req
+            )
+
+        self.full_path_read = ""
+        print "pg_select 534546546978"
+        for row in self.rows_pg:
+            for i in range(len(row)):
+                if i == 1:
+                    self.chemin_sans_root = row[i]
+                self.full_path_read = \
+                    self.full_path_read + row[i]
+
+        # sys.exit(0)
+        print "full_path: "
+        print self.full_path_read
+
+        print ""
+        print ""
+        print ""
+        print self.root_local + self.chemin_sans_root
+        # sys.exit(0)
+        self.dl_fichier(
+            remote_file01 = self.full_path_read,
+            sauvegardee_dans = self.root_local + str(self.chemin_sans_root)[-55:]
+            )
+
+        time.sleep(2)
+        self.sources.append(Phonon.MediaSource(
+            self.root_local + str(self.chemin_sans_root)[-55:]
+            ))
 
 
     def mount_samba_server(self):
@@ -540,8 +590,6 @@ class MainWindow(QtGui.QMainWindow):
         # alaina ts1r1 ny multi_easycode izai ani am fichier.xlsx
         # ni multi_easycode=multieasyc_i dia mety manana enregistrement maro2
         for i in range(0, sheet0.nrows):
-
-
             # multieasyc_i dia meti manana enregistrement maro2
             multieasyc_i = sheet0.row_values(i, 0, 1)[0]
 
@@ -572,6 +620,33 @@ class MainWindow(QtGui.QMainWindow):
             if i != (sheet0.nrows-1):
                 cpt_chm = 0
                 for chemin in cheminS:
+                    test_exist_fichier = self.root_distant + chemin
+
+                    samba_ = "\\\\192.168.10.19\\voice\\"
+                    file01 = Path(samba_ + chemin)
+                    if (
+                            # ao am Voice
+                            file01.is_file()
+                        ):
+                        root_distant = "\\\\192.168.10.19\\voice\\"
+                        print root_distant + chemin
+                        # sys.exit(0)
+                    # elif (
+                            # # self.samba_check_file(
+                                # # remote_file = chemin 
+                            # # ) == "\\\\192.168.10.19\\voice\\"
+                        # ):
+                        # root_distant = "\\\\192.168.10.19\\voice\\"
+                    else: # itest ao am Storage
+                        samba_ = "\\\\mcuci\\Storage$\\"
+                        file01 = Path(samba_ + chemin)
+                        if (
+                            # ao am Voice
+                            file01.is_file()
+                        ):
+                            root_distant = "\\\\mcuci\\Storage$\\"
+
+                    # sys.exit(0)
                     if cpt_chm != (len(cheminS) - 1):
                         query_insert += "( '"
                         query_insert += chemin + "', '" \
@@ -1000,32 +1075,37 @@ class MainWindow(QtGui.QMainWindow):
 
     def samba_check_file(self,
             bool01 = True,  # franchement tsy haiko ni dikanito.. misi anio bool01 io maro2 aah
-            samba_server_storage = "\\\\mcuci\\Storage$",
-            remote_file = "\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav"):
-        from pathlib import Path
+            samba_server = "\\\\mcuci\\Storage$\\",
+            # samba_server = "\\\\192.168.10.19\\voice\\",
+            remote_file = "2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav"):
         
-        path_to_file = samba_server_storage + remote_file
+        path_to_file = samba_server + remote_file
 
         # testena ao am storage
         my_file = Path(path_to_file)
         if my_file.is_file():
-            print "ao am storage"
+            print "ato am storage"
+            print path_to_file
+            # sys.exit(0)
+            return samba_server
         else:
-            samba_server_voice = "\\\\192.168.10.19\\voice"
+            samba_server_voice = "\\\\mcuci\\Storage$\\"
             path_to_file = samba_server_voice + remote_file
             my_file = Path(path_to_file)
             if my_file.is_file():
                 print "ao am voice"
+                return samba_server_voice
             else:
-                print "fichier inexistant"
+                print "fichier inexistant: " + remote_file
+                return "inexistant"
 
 
-        return my_file.is_file()
+        # return my_file.is_file()
 
         # os.system()
 
 
-        print ""
+        # print ""
 
 
     def changed_campagne(self):
@@ -1042,7 +1122,7 @@ class MainWindow(QtGui.QMainWindow):
         
         if (os.path.exists(sauvegardee_dans)):
             print "fichier: " + sauvegardee_dans + " existe dans votre ordi"
-            sys.exit(0)
+            # sys.exit(0)
         else:
             
             # mlam ... lasa nisi anlay param_bool01 io
@@ -1357,6 +1437,8 @@ class MainWindow(QtGui.QMainWindow):
         # les entetes du table_dialog
         self.qtable01.setHorizontalHeaderLabels(
             ['Download', 'Fini', 'Chemin', 'Easycode'])
+
+
 
         self.qtable01.doubleClicked.connect(self.double_clicked_qtable01)
 

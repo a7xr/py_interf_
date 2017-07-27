@@ -42,6 +42,16 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect_sql_server()
         self.connect_pg()
+        self.connect_pg(
+            server01 = '192.168.10.5',
+            user01='pgtantely',
+            password01='123456',
+            database01='production')
+
+        # self.connect_pg(
+            # server01 = '192.168.10.5',
+            # user01 = 'pgtantely',
+            # password01 = "123456")
 
         self.campagne = ""
         self.call_date = ""
@@ -83,6 +93,32 @@ class MainWindow(QtGui.QMainWindow):
         self.mediaObject.play()
         print "you clicked play_button"
 
+        req001 = "UPDATE prj_ecoute01 SET fini = 1 "\
+            +"WHERE chemin__a_partir_root = '" \
+            +self.chemin_sans_root+"';"
+
+        print req001
+        self.pg_not_select(
+            query01 = req001,
+            host = "127.0.0.1")
+
+
+
+    def select_list_campagne(self):
+        self.pg_select(
+            query = "select campagne, table_campagne from ecoute_enreg",
+            host = "192.168.10.5")
+
+        self.campagne__table_campagne = {}
+        for row in self.rows_pg_10_5:
+            self.campagne__table_campagne[row[0]] = row[1]
+
+        # print self.campagne__table_campagne
+
+        return sorted(list(self.campagne__table_campagne.keys()))
+
+
+
     def etat_elemS(self,
             campg = False,
             multieasyc = False,
@@ -102,18 +138,7 @@ class MainWindow(QtGui.QMainWindow):
         print "unmounted samba_Storage"
         
     def double_clicked_qtable01(self):
-        print "double clicked potato" 
-        
-        # ti mbl mnw telechargement FTSN
-        # mnw requete ani am pg we aiza no misi anlay 
-        # # full_path_read
-        # #
-        # # arakaraka ni self.clicked_enreg
-
-
-        
-        
- 
+        print "double clicked potato"
         index = len(self.sources)
         print "index: " + str(index)
         if self.sources:
@@ -121,21 +146,16 @@ class MainWindow(QtGui.QMainWindow):
 
         indexes = self.qtable01.selectionModel().selectedRows()
 
-        print "index024689361: " 
+        # print "index024689361: " 
 
+        # ty indexes eto ambani ti dia type: PyQt4.QtCore.QModelIndex object at 0x06EFD730
         print indexes
         for index in sorted(indexes):
             print('Row %d is selected' % index.row())
             self.clicked_enreg = self.\
                 list__dl_fini_chemin_easycode[index.row()][2]
-            print self.list__dl_fini_chemin_easycode[index.row()][2]
-        ######eto
-        # rhf m_click anlay item ao am item@qtable01 dia 
-        # # m_dl
-        # # # testena loon we aiz no misi anlay fichier tkn dl_na
-        # # # sauvena qlq_part ilai fichier__n_telechargena
-        # # # alefa ani am self.source ilai fichier__n_telechargena
-        # # manao anlai play ao am n_telechargena
+        
+        # sys.exit(0)
         req = "SELECT"\
             +" root_distant, chemin__a_partir_root "\
             +"FROM prj_ecoute01 "\
@@ -151,33 +171,56 @@ class MainWindow(QtGui.QMainWindow):
             )
 
         self.full_path_read = ""
-        print "pg_select 534546546978"
-        for row in self.rows_pg:
+        for row in self.rows_pg_local:
             for i in range(len(row)):
                 if i == 1:
                     self.chemin_sans_root = row[i]
                 self.full_path_read = \
                     self.full_path_read + row[i]
 
-        # sys.exit(0)
-        print "full_path: "
-        print self.full_path_read
+        # print "full_path: "
+        # print self.full_path_read
 
         print ""
         print ""
         print ""
         print self.root_local + self.chemin_sans_root
-        # sys.exit(0)
         self.dl_fichier(
             remote_file01 = self.full_path_read,
             sauvegardee_dans = self.root_local + str(self.chemin_sans_root)[-55:]
             )
 
         time.sleep(2)
-        self.sources.append(Phonon.MediaSource(
-            self.root_local + str(self.chemin_sans_root)[-55:]
-            ))
+        self.sources.append(
+            Phonon.MediaSource(
+                self.root_local + str(self.chemin_sans_root)[-55:]
+            )
+        )
+        print "clicked somewhere"
+        # sys.exit(0)
 
+        ####eto
+        # rhf m_double_click anlay qtable01 dia mnw mis_a_jour anlay 
+        # # pg_local izai rattachee am self.chemin_sans_root
+        req001 = "UPDATE prj_ecoute01 SET telechargee = 1 "\
+            +"WHERE chemin__a_partir_root = '" \
+            +self.chemin_sans_root+"';"
+        print req001
+        self.pg_not_select(
+            query01 = req001,
+            host = "127.0.0.1")
+        # sys.exit(0)
+        self.dialog01.close()
+        self.double_clicked_multieasycode()
+        
+        # self.dialog_monoeasycode()
+
+
+
+
+    def del_all_sources(self):
+        self.sources = []
+        self.musicTable.setRowCount(0);
 
     def mount_samba_server(self):
         '''
@@ -193,11 +236,15 @@ class MainWindow(QtGui.QMainWindow):
 
 
     # attention au 
-    def pg_select(self,
+    def pg_select(self, host = "127.0.0.1",
             query = "select * from prj_ecoute01"):
-        self.cursor_pg.execute(query)
-        self.rows_pg = self.cursor_pg.fetchall()
-
+        if (host == "127.0.0.1"):
+            self.cursor_pg_local.execute(query)
+            self.rows_pg_local = self.cursor_pg_local.fetchall()
+        elif (host == "192.168.10.5"):
+            self.cursor_pg_10_5.execute(query)
+            self.rows_pg_10_5 = self.cursor_pg_10_5.fetchall()
+            print ""
         print "pg_select _ code 000012654564"
 
 
@@ -214,31 +261,6 @@ class MainWindow(QtGui.QMainWindow):
             currentItem().\
             text()
 
-
-        # dans double_clicked_multieasycode
-        ##requete ##query
-        # ti requete ti dia hnw requete ani am sql_server
-            # req = "SELECT substring(time_stamp, 1, 4) "\
-                # +"+ '\\' + substring(time_stamp, 5, 2) "\
-                # +"+ '\\' + substring(time_stamp, 7, 2) "\
-                # +"+ '\\' + substring(time_stamp, 9, 2) "\
-                # +"+ '\\' + substring(time_stamp, 11, 2) "\
-                # +"+ '\\' + substring(time_stamp, 13, 5) "\
-                # +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
-                # +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
-                # + "easy.dbo."\
-                # +self.campagne\
-                # +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
-                # + self.campagne \
-                # + ".easycode " \
-                # +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
-                # +"INNER JOIN easy.dbo.call_thread " \
-                # +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
-                # +"WHERE easy.dbo."\
-                # +self.campagne \
-                # + ".easycode = "\
-                # +self.multieasycode +")"
-
         # alaina aa partir ny: multieasycode, table_campagne
         req = "SELECT " \
         + "telechargee, " \
@@ -249,21 +271,19 @@ class MainWindow(QtGui.QMainWindow):
         + "root_distant " \
         + "FROM prj_ecoute01 " \
         + "WHERE table_campagne like '" \
-        + self.combo_box__campagne.currentText() \
+        + self.table_campagne01 \
         + "' AND " + "multi_easycode=" \
         + self.qtlist_multieasycode.currentItem().text()
 
-        print "code654654654654: " 
-        print type(self.qtlist_multieasycode.currentItem().text())
-        
-
-        print ""
-        print ""
-        print ""
-        print ""
-        print ""
-        print "requete dans double_clicked_multieasycode:"
-        print req
+        # print "code654654654654: " 
+        # print type(self.qtlist_multieasycode.currentItem().text())
+        # print ""
+        # print ""
+        # print ""
+        # print ""
+        # print ""
+        # print "requete dans double_clicked_multieasycode:"
+        # print req
 
 
 
@@ -275,11 +295,11 @@ class MainWindow(QtGui.QMainWindow):
         print ""
 
         # le double_t suivant est fait par expres
-        listt__dl_fini_chemin_easycode = [] * (len(self.rows_pg))
-        # listt__dl_fini_chemin_easycode = [[] for x in xrange(len(self.rows_pg))]
+        listt__dl_fini_chemin_easycode = [] * (len(self.rows_pg_local))
+        # listt__dl_fini_chemin_easycode = [[] for x in xrange(len(self.rows_pg_local))]
         
         
-        for row in self.rows_pg:
+        for row in self.rows_pg_local:
             list01 = [None] * (len(row))
             for i in range(len(row)):
                 if i == 0:
@@ -315,6 +335,9 @@ class MainWindow(QtGui.QMainWindow):
 
 
         self.list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
+        print "qsdmlfkjqsdlmfkjqsdlmkfjqsdmlfjkqsdlmfjqsdlmkfj"
+        print listt__dl_fini_chemin_easycode
+        # sys.exit(0)
         self.dialog_monoeasycode(
             list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
             )
@@ -431,15 +454,15 @@ class MainWindow(QtGui.QMainWindow):
             +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
             +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
             + "easy.dbo."\
-            +table_campagne\
+            +self.table_campagne01\
             +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
-            + table_campagne \
+            + self.table_campagne01 \
             + ".easycode " \
             +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
             +"INNER JOIN easy.dbo.call_thread " \
             +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
             +"WHERE easy.dbo."\
-            +table_campagne \
+            +self.table_campagne01 \
             + ".easycode = "\
             +str(multieasy) +")"
 
@@ -540,7 +563,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # mnw anle drop_table
         drop_query = "DROP TABLE IF EXISTS prj_ecoute01;"
-        self.pg_not_select(drop_query)
+        self.pg_not_select(query01 = drop_query)
         print "table: prj_ecoute01 est EFFACEE"
 
 
@@ -655,7 +678,7 @@ class MainWindow(QtGui.QMainWindow):
                         + telechargee + "', '"\
                         + fini + "', "\
                         + str(int(multieasyc_i)) + ", '" \
-                        + self.combo_box__campagne.currentText()\
+                        + str(self.table_campagne01)\
                         + "'), "
                     else:
                         query_insert += "( '"
@@ -665,7 +688,7 @@ class MainWindow(QtGui.QMainWindow):
                         + telechargee + "', '"\
                         + fini + "', "\
                         + str(int(multieasyc_i)) + ", '"\
-                        + self.combo_box__campagne.currentText()\
+                        + self.table_campagne01\
                         + "'), "
                     cpt_chm = cpt_chm + 1
 
@@ -692,7 +715,7 @@ class MainWindow(QtGui.QMainWindow):
                         + telechargee + "', '"\
                         + fini + "', "\
                         + str(int(multieasyc_i)) + ", '"\
-                        + self.combo_box__campagne.currentText()\
+                        + self.table_campagne01\
                         + "'), "
                     else:
                         query_insert += "( '"
@@ -702,7 +725,7 @@ class MainWindow(QtGui.QMainWindow):
                         + telechargee + "', '"\
                         + fini + "', "\
                         + str(int(multieasyc_i)) + ", '"\
-                        + self.combo_box__campagne.currentText()\
+                        + self.table_campagne01\
                         + "') "
                     cpt_chm = cpt_chm + 1
 
@@ -723,10 +746,10 @@ class MainWindow(QtGui.QMainWindow):
 
 
         # ty tsy olana fa ilai fanamboarana anlai requete no enjana
-        self.cursor_pg.execute(query_insert)
+        self.cursor_pg_local.execute(query_insert)
 
         # eto ni mnw insertion
-        self.connect_pg.commit()
+        self.connect_pg_local.commit()
 
         # self.conn_sql_server \
             # .execute_query(query_insert)
@@ -823,9 +846,13 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-    def pg_not_select(self, query):
-        self.cursor_pg.execute(query)
-        self.connect_pg.commit()
+    def pg_not_select(self, 
+            query01,            
+            host = "127.0.0.1"):
+        if( host == "127.0.0.1"):
+            self.cursor_pg_local.execute(query01)
+            self.connect_pg_local.commit()
+            # self.cursor_pg_local.close()
 
     def connect_pg(self, 
             server01 = '127.0.0.1',
@@ -833,18 +860,31 @@ class MainWindow(QtGui.QMainWindow):
             password01='123456',
             database01='saisie'):
 
-        self.connect_pg = psycopg2.connect(
-            "dbname=" + database01
-            +" user=" + user01
-            +" password=" + password01
-            +" host=" + server01
-        ) #local
+        if (server01 == '127.0.0.1'):
+            self.connect_pg_local = psycopg2.connect(
+                "dbname=" + database01
+                +" user=" + user01
+                +" password=" + password01
+                +" host=" + server01
+            ) #local
 
-        self.connect_pg.set_isolation_level(0)
+            self.connect_pg_local.set_isolation_level(0)
 
-        self.cursor_pg = self.connect_pg.cursor()
+            self.cursor_pg_local = self.connect_pg_local.cursor()
 
-        print "connection ok au postgresql"
+            print "connection ok au postgresql LOCAL"
+        elif(server01 == '192.168.10.5'):
+            self.connect_pg_10_5 = psycopg2.connect(
+                "dbname=" + database01
+                +" user=" + user01
+                +" password=" + password01
+                +" host=" + server01
+            )
+            self.connect_pg_10_5.set_isolation_level(0)
+
+            self.cursor_pg_10_5 = self.connect_pg_10_5.cursor()
+
+            print "connection ok au postgresql 192.168.10.5"
 
      
             
@@ -892,9 +932,9 @@ class MainWindow(QtGui.QMainWindow):
                 campgn = self.combo_box__campagne.currentText())
 
         self.etat_elemS(
-            campg = False,
+            campg = True,
             multieasyc = True,
-            monoeasyc = False,
+            monoeasyc = True,
             dldd = True
         )
 
@@ -903,6 +943,11 @@ class MainWindow(QtGui.QMainWindow):
         print list_call_date01
         list_call_date01 = list(set(list_call_date01))
         list_call_date01 = sorted(list_call_date01)
+
+        self.table_campagne01 = str(self.campagne__table_campagne.get(
+                self.combo_box__campagne.currentText()
+            ))
+        print self.table_campagne01
 
         # print list_call_date01
         # for a in list_call_date01 :
@@ -1078,7 +1123,6 @@ class MainWindow(QtGui.QMainWindow):
             samba_server = "\\\\mcuci\\Storage$\\",
             # samba_server = "\\\\192.168.10.19\\voice\\",
             remote_file = "2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav"):
-        
         path_to_file = samba_server + remote_file
 
         # testena ao am storage
@@ -1310,7 +1354,9 @@ class MainWindow(QtGui.QMainWindow):
                             # # you should delete that one
             # self.umount_samba_server
             # self.lire_xlsx_campagne 
-            self.dialog_monoeasycode
+            # self.dialog_monoeasycode 
+            # self.del_all_sources
+            self.select_list_campagne
             # self.check_existance_pg_int
         )
 
@@ -1440,7 +1486,9 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-        self.qtable01.doubleClicked.connect(self.double_clicked_qtable01)
+        # self.qtable01.doubleClicked.connect(self.double_clicked_qtable01)
+
+        self.qtable01.itemClicked.connect(self.double_clicked_qtable01)
 
         for row in range(len(list__dl_fini_chemin_easycode)):
             for col in range(len(list__dl_fini_chemin_easycode[row])):
@@ -1530,8 +1578,12 @@ class MainWindow(QtGui.QMainWindow):
         #~ #instanciation by default
 
         self.musicTable = QtGui.QTableWidget(0, 4)
-        
-        
+        self.musicTable.setStyleSheet(
+            '''
+            QTableWidget { max-width: 1000px; min-height: 200px;}
+            '''
+            )
+
         self.combo_box__campagne = QtGui.QComboBox()
 
         self.qtlist_dldd = QtGui.QListWidget()
@@ -1542,14 +1594,13 @@ class MainWindow(QtGui.QMainWindow):
             QListWidget { max-width: 150px; min-height: 200px;}
             '''
             )
-
         self.qtlist_multieasycode.addItem("")
 
         self.qtlist_monoeasycode = QtGui.QListWidget()
         
 
         self.combo_box__campagne.setStyleSheet('''
-            QComboBox { max-width: 100px; min-height: 20px;}
+            QComboBox { max-width: 1000px; min-height: 20px;}
             '''
             )
 
@@ -1557,7 +1608,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.combo_box__campagne.addItems(
             # ["campagne01", "campagne02", "campagne03"]
-            self.lire_xlsx_campagne()
+            self.select_list_campagne()
         )
 
         #~ ##liaison des elem_graphique avec meth01
@@ -1627,7 +1678,7 @@ class MainWindow(QtGui.QMainWindow):
         )
 
 
-
+        # dans _ def setupUi(self):
 
         mainLayout = QtGui.QVBoxLayout()
         qvbox_layout_music_table01 = QtGui.QHBoxLayout()
@@ -1683,6 +1734,8 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle(
             "Vivetic"
         )
+
+        # fin _ def setupUi(self):
 
 
 

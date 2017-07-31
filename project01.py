@@ -20,7 +20,6 @@ try:
 except ImportError:
     app = QtGui.QApplication(sys.argv)
     QtGui.QMessageBox.critical(None, "Music Player",
-            # "Your Qt installation does not have Phonon support.",
             "La version de votre Qt ne supporte pas Phonon.",
             QtGui.QMessageBox.Ok | QtGui.QMessageBox.Default,
             QtGui.QMessageBox.NoButton)
@@ -48,10 +47,7 @@ class MainWindow(QtGui.QMainWindow):
             password01='123456',
             database01='production')
 
-        # self.connect_pg(
-            # server01 = '192.168.10.5',
-            # user01 = 'pgtantely',
-            # password01 = "123456")
+        self.playlist = []
 
         self.campagne = ""
         self.call_date = ""
@@ -89,10 +85,38 @@ class MainWindow(QtGui.QMainWindow):
 
         self.sources = []
 
+    def changed_music_table(self):
+        print "changed"
+        indexes = self.musicTable.selectionModel().selectedRows()
+
+        for index in sorted(indexes):
+            # rint('Row %d is selected' % index.row())
+            self.clicked_playing = self.\
+                list__dl_fini_chemin_easycode[index.row()][2]
+        
+
+        print self.clicked_playing
+
+
     def clicked_play_action(self):
         self.mediaObject.play()
         print "you clicked play_button"
 
+        print self.metaInformationResolver.metaData()
+        
+        # sys.exit(0)
+
+        indexes = self.musicTable.selectionModel().selectedRows()
+
+        for index in sorted(indexes):
+            # rint('Row %d is selected' % index.row())
+            self.clicked_playing = self.\
+                list__dl_fini_chemin_easycode[index.row()][2]
+
+
+        print self.clicked_playing
+
+        # sys.exit(0)
         req001 = "UPDATE prj_ecoute01 SET fini = 1 "\
             +"WHERE chemin__a_partir_root = '" \
             +self.chemin_sans_root+"';"
@@ -137,14 +161,14 @@ class MainWindow(QtGui.QMainWindow):
         Popen("bat_files\\umount_samba_Storage.bat")
         print "unmounted samba_Storage"
         
-    def double_clicked_qtable01(self):
-        print "double clicked potato"
+    def changed_clicked_qtable_at_dialog(self):
+        print "changed qtable at dialog"
         index = len(self.sources)
         print "index: " + str(index)
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
 
-        indexes = self.qtable01.selectionModel().selectedRows()
+        indexes = self.qtable_at_dialog.selectionModel().selectedRows()
 
         # print "index024689361: " 
 
@@ -190,13 +214,20 @@ class MainWindow(QtGui.QMainWindow):
             sauvegardee_dans = self.root_local + str(self.chemin_sans_root)[-55:]
             )
 
-        time.sleep(2)
+
+        # ty iz no mi_ajoutee ani am playlist
         self.sources.append(
             Phonon.MediaSource(
                 self.root_local + str(self.chemin_sans_root)[-55:]
             )
         )
-        print "clicked somewhere"
+
+        self.playlist.append(self.root_local + str(self.chemin_sans_root)[-55:])
+
+        print "playlist656546546:"
+        print len(self.playlist)
+        print self.playlist
+        # print "clicked somewhere"
         # sys.exit(0)
 
         ####eto
@@ -212,10 +243,116 @@ class MainWindow(QtGui.QMainWindow):
         # sys.exit(0)
         self.dialog01.close()
         self.double_clicked_multieasycode()
+
+        # self.dialog_enregistrement()
+
+
+
+    def changed_clicked_qtable_at_dialog__to_del(self):
         
-        # self.dialog_monoeasycode()
+        index = len(self.sources)
+        
+        if self.sources:
+            self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
+
+        # ito no maka ni zvt izai voa_selectionnee ao am qtable_dialog
+        indexes = self.qtable_at_dialog.selectionModel().selectedRows()
+
+        # ty indexes eto ambani ti dia type: PyQt4.QtCore.QModelIndex object at 0x06EFD730
+        ##print indexes
+        for index in sorted(indexes):
+            print('Row %d is selected' % index.row())
+            self.clicked_enreg = self.\
+                list__dl_fini_chemin_easycode[index.row()][2]
+        
+        # sys.exit(0)
+        req = "SELECT"\
+            +" root_distant, chemin__a_partir_root "\
+            +"FROM prj_ecoute01 "\
+            +"WHERE "\
+            +"chemin__a_partir_root "\
+            +"= '"\
+            +self.clicked_enreg\
+            +"';"
+        print req
+
+        self.pg_select(
+            query = req
+            )
+
+        self.full_path_read = ""
+        for row in self.rows_pg_local:
+            for i in range(len(row)):
+                if i == 1:
+                    self.chemin_sans_root = row[i]
+                self.full_path_read = \
+                    self.full_path_read + row[i]
+
+        self.dl_fichier(
+            remote_file01 = self.full_path_read,
+            sauvegardee_dans = self.root_local + str(self.chemin_sans_root)[-55:]
+            )
 
 
+        # ty iz no mi_ajoutee ani am playlist
+        self.sources.append(
+            Phonon.MediaSource(
+                # self.root_local + str(self.chemin_sans_root)[-55:]
+                'E:\\DISK_D\\ecoutes\\2017\\07\\06\\09\\53\\110003e0aa8c000001540595e088486910013a1480001000140.wav'
+            )
+        )
+
+        self.playlist.append(self.root_local + str(self.chemin_sans_root)[-55:])
+
+        print "playlist656546546:"
+        print len(self.playlist)
+        print self.playlist
+        # print "clicked somewhere"
+        # sys.exit(0)
+
+        ####eto
+        # rhf m_double_click anlay qtable01 dia mnw mis_a_jour anlay 
+        # # pg_local izai rattachee am self.chemin_sans_root
+        req001 = "UPDATE prj_ecoute01 SET telechargee = 1 "\
+            +"WHERE chemin__a_partir_root = '" \
+            +self.chemin_sans_root+"';"
+        print req001
+        self.pg_not_select(
+            query01 = req001,
+            host = "127.0.0.1")
+        # sys.exit(0)
+        self.dialog01.close()
+        self.double_clicked_multieasycode()
+
+
+
+
+    def add_single_song_to_playlist(self,
+        bool01 = True,
+        path_audio = 'E:\\DISK_D\\ecoutes\\370003e0aa8c00000154059673b979cb100157afc0001000037.wav'):
+        
+
+
+        index = len(self.sources)
+        # for string in files:
+            # self.sources.append(Phonon.MediaSource(string))
+            
+        self.sources.append(Phonon.MediaSource(path_audio))
+
+        if self.sources:
+            self.metaInformationResolver.setCurrentSource(self.sources[index])
+
+        print "Ajoutee au Playlist: " + path_audio
+
+    
+        # self.sources.append(
+            # Phonon.MediaSource(
+                # 'E:\\DISK_D\\ecoutes\\2017\\07\\06\\09\\53\\110003e0aa8c000001540595e088486910013a1480001000140.wav'))
+
+
+        # if self.sources:
+            # index = len(self.sources)
+            # self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
 
 
     def del_all_sources(self):
@@ -245,12 +382,12 @@ class MainWindow(QtGui.QMainWindow):
             self.cursor_pg_10_5.execute(query)
             self.rows_pg_10_5 = self.cursor_pg_10_5.fetchall()
             print ""
-        print "pg_select _ code 000012654564"
+        # print "pg_select _ code 000012654564"
 
 
     def double_clicked_multieasycode(self):
-        print "double clicked multieasycode"
-        print "- mande manao anlay requete lava b amzai"
+        # print "double clicked multieasycode"
+        # print "- mande manao anlay requete lava b amzai"
         print ""
         print ""
         print ""
@@ -318,7 +455,7 @@ class MainWindow(QtGui.QMainWindow):
                 else:
                     list01[i] = row[i]
                 
-            print "qsdmlkfjqsmldfkjqsdlmfkj: "
+            # print "qsdmlkfjqsmldfkjqsdlmfkj: "
             print list01
             listt__dl_fini_chemin_easycode.append(list01)
         # sys.exit(0)
@@ -329,16 +466,16 @@ class MainWindow(QtGui.QMainWindow):
         print ""
         print ""
         print ""
-        print "test000011"
-        print listt__dl_fini_chemin_easycode
+        # print "test000011"
+        # print listt__dl_fini_chemin_easycode
         # sys.exit(0)
 
 
         self.list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
-        print "qsdmlfkjqsdlmfkjqsdlmkfjqsdmlfjkqsdlmfjqsdlmkfj"
+        print "les playlists 00212132132"
         print listt__dl_fini_chemin_easycode
         # sys.exit(0)
-        self.dialog_monoeasycode(
+        self.dialog_enregistrement(
             list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
             )
         
@@ -893,15 +1030,17 @@ class MainWindow(QtGui.QMainWindow):
             "Veuillez choisir un Fichier Audio",
             QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))
 
+        print files
+
         if not files:
             return
 
         index = len(self.sources)
 
-        for string in files:
-            self.sources.append(Phonon.MediaSource(string))
+        # for string in files:
+            # self.sources.append(Phonon.MediaSource(string))
             
-            
+        self.sources.append(Phonon.MediaSource('E:\\DISK_D\\mamitiana\\zik\\Nouveau dossier\\Sabre dance.mp3'))
 
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
@@ -922,7 +1061,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def selection_change_combo_campagne(self):  
-        print "changed combo box of campagne"
+        # print "changed combo box of campagne"
         
 
         # print self.combo_box__campagne.currentText()
@@ -1155,6 +1294,41 @@ class MainWindow(QtGui.QMainWindow):
     def changed_campagne(self):
         print "changed campagne"
 
+    def clicked_ajouter_dialog(self):
+        # print indexes
+        indexes = self.qtable_at_dialog.selectionModel().selectedRows()
+        for index in sorted(indexes):
+            # print('Row %d is selected' % index.row())
+            self.clicked_enreg = self.\
+                list__dl_fini_chemin_easycode[index.row()][2]
+            self.playlist.append(self.list__dl_fini_chemin_easycode[index.row()][2])
+
+            chemin_enreg__local = self.root_local \
+                + self.list__dl_fini_chemin_easycode[index.row()][2][-55:]
+
+            self.add_single_song_to_playlist(
+                path_audio = chemin_enreg__local
+            )
+
+        # print "playlist00212121"
+        # print self.playlist
+
+
+        # self.sources.append(Phonon.MediaSource('E:\\DISK_D\\ecoutes\\2017\\07\\13\\15\\44\\490003e0aa8c0000015405967956bbc9f0015b3820001000205.wav'))
+
+
+        # for tmp in self.playlist:
+            # self.sources.append(
+                # Phonon.MediaSource(
+                    # self.root_local + tmp
+                # )
+            # )
+            # print ""
+            # print self.root_local + tmp
+            # self.add_single_song_to_playlist(path_audio = (self.root_local + tmp))
+
+        print "clicked ajouter au dialog"
+
     def dl_fichier (
         self,
         bool01 = True,
@@ -1354,10 +1528,11 @@ class MainWindow(QtGui.QMainWindow):
                             # # you should delete that one
             # self.umount_samba_server
             # self.lire_xlsx_campagne 
-            # self.dialog_monoeasycode 
+            # self.dialog_enregistrement 
             # self.del_all_sources
-            self.select_list_campagne
+            # self.select_list_campagne
             # self.check_existance_pg_int
+            self.add_single_song_to_playlist
         )
 
         self.bouton_play_audio = QtGui.QPushButton(
@@ -1440,7 +1615,7 @@ class MainWindow(QtGui.QMainWindow):
         aboutMenu.addAction(self.aboutQtAction)
 
 
-    def dialog_monoeasycode(self, 
+    def dialog_enregistrement(self, 
             bool01 = True,
             list__dl_fini_chemin_easycode
             = 
@@ -1461,34 +1636,40 @@ class MainWindow(QtGui.QMainWindow):
         self.dialog01 = QtGui.QDialog()
         qvbox_layout_dialog = QtGui.QHBoxLayout(self.dialog01)
         
-        self.button01 = QtGui.QPushButton("ok", self.dialog01)
-        self.button01.clicked.connect(self.clicked_bouton_fermer_dialog)
+        self.button_close_at_dialog = QtGui.QPushButton("Close", self.dialog01)
+        self.button_ajouter_at_dialog = QtGui.QPushButton("Ajouter", self.dialog01)
+
+        self.button_close_at_dialog.clicked.connect(self.clicked_bouton_fermer_dialog)
+        self.button_ajouter_at_dialog.clicked.connect(self.clicked_ajouter_dialog)
 
 
         rows = len(list__dl_fini_chemin_easycode)
         cols = len(list__dl_fini_chemin_easycode[0])
-        self.qtable01 = QtGui.QTableWidget(rows, cols, self.dialog01)
-        self.qtable01.setSelectionBehavior(QtGui.QTableView.SelectRows)
-
+        self.qtable_at_dialog = QtGui.QTableWidget(rows, cols, self.dialog01)
+        self.qtable_at_dialog.setSelectionBehavior(QtGui.QTableView.SelectRows)
+        
 
         self.dialog01.setMinimumSize(600, 50)
-        self.qtable01.setStyleSheet(
+        self.qtable_at_dialog.setStyleSheet(
             '''
             QTableWidget { max-width: 600px; min-height: 200px;}
             '''
             )
-        qvbox_layout_dialog.addWidget(self.button01)
-        qvbox_layout_dialog.addWidget(self.qtable01)
+        qvbox_layout_dialog.addWidget(self.button_close_at_dialog)
+        qvbox_layout_dialog.addWidget(self.button_ajouter_at_dialog)
+        qvbox_layout_dialog.addWidget(self.qtable_at_dialog)
 
         # les entetes du table_dialog
-        self.qtable01.setHorizontalHeaderLabels(
+        self.qtable_at_dialog.setHorizontalHeaderLabels(
             ['Download', 'Fini', 'Chemin', 'Easycode'])
 
 
 
-        # self.qtable01.doubleClicked.connect(self.double_clicked_qtable01)
 
-        self.qtable01.itemClicked.connect(self.double_clicked_qtable01)
+
+        # self.qtable_at_dialog.itemClicked.connect(
+            # self.changed_clicked_qtable_at_dialog__to_del
+        # )
 
         for row in range(len(list__dl_fini_chemin_easycode)):
             for col in range(len(list__dl_fini_chemin_easycode[row])):
@@ -1502,7 +1683,7 @@ class MainWindow(QtGui.QMainWindow):
                     else:
                         item.setCheckState(QtCore.Qt.Checked)
                         item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
-                    self.qtable01.setItem(row, col, item)
+                    self.qtable_at_dialog.setItem(row, col, item)
 
                 elif col == 1:
                     # Fini
@@ -1514,7 +1695,7 @@ class MainWindow(QtGui.QMainWindow):
                         item.setCheckState(QtCore.Qt.Checked)
                         item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
                     
-                    self.qtable01.setItem(row, col, item)
+                    self.qtable_at_dialog.setItem(row, col, item)
 
                 elif col == 2:
                     # Chemin
@@ -1522,14 +1703,14 @@ class MainWindow(QtGui.QMainWindow):
                         list__dl_fini_chemin_easycode[row][col]
                     )
                     item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
-                    self.qtable01.setItem(row, col, item)
+                    self.qtable_at_dialog.setItem(row, col, item)
                 elif col == 3:
                     # easycode
                     item = QtGui.QTableWidgetItem(
                         str(list__dl_fini_chemin_easycode[row][col])
                     )
                     item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
-                    self.qtable01.setItem(row, col, item)
+                    self.qtable_at_dialog.setItem(row, col, item)
 
 
         self.dialog01.setWindowTitle("Dialog")
@@ -1583,6 +1764,10 @@ class MainWindow(QtGui.QMainWindow):
             QTableWidget { max-width: 1000px; min-height: 200px;}
             '''
             )
+
+        self.musicTable.itemClicked.connect(self.changed_music_table)
+
+
 
         self.combo_box__campagne = QtGui.QComboBox()
 
@@ -1691,9 +1876,9 @@ class MainWindow(QtGui.QMainWindow):
         # qvbox_layout_music_table01.addWidget(self.qtlist_monoeasycode)
         qvbox_layout_music_table01.addWidget(self.bouton_reinit_elemS)
 
-        qvbox_layout_music_table02.addWidget(self.qtlist_dldd)
+        # qvbox_layout_music_table02.addWidget(self.qtlist_dldd)
         qvbox_layout_music_table02.addWidget(self.bouton_test)
-        qvbox_layout_music_table02.addWidget(self.bouton_play_audio)
+        # qvbox_layout_music_table02.addWidget(self.bouton_play_audio)
 
 
         mainLayout.addWidget(

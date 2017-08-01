@@ -327,7 +327,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def add_single_song_to_playlist(self,
         bool01 = True,
-        path_audio = 'E:\\DISK_D\\ecoutes\\370003e0aa8c00000154059673b979cb100157afc0001000037.wav'):
+        path_audio = 'E:\\DISK_D\\ecoutes\\370003e0aa8c00000154059673b979cb100157afc0001000037.wav'
+        # path_audio = "akindo"
+        ):
         
 
 
@@ -723,15 +725,21 @@ class MainWindow(QtGui.QMainWindow):
         #fin select_chemin
 
 
+    def to_del001(self):
+        self.add_single_song_to_playlist('qsdfqsdf')
 
     def import_xls(self,
             bool01 = True,
-            root_local = "E:\\DISK_D\\ecoutes\\", 
+            #root_local = "E:\\DISK_D\\ecoutes\\", 
+            root_local = ".\\ecoute_enreg\\",
             root_distant = "\\\\mcuci\\Storage$\\",
             telechargee = "0",
             fini = "0",
             monoeasy = "17868031"
         ):
+
+        if not os.path.exists(root_local):
+            os.makedirs(root_local)
 
         self.root_local = root_local
         self.root_distant = root_distant
@@ -819,11 +827,26 @@ class MainWindow(QtGui.QMainWindow):
             + "mono_easycode INTEGER"  \
             +")"
 
+        drop_seq = "DROP SEQUENCE IF EXISTS prj_ecoute01_seq;"
+        self.pg_not_select(drop_seq)
+
+        create_seq = "CREATE SEQUENCE prj_ecoute01_seq "\
+            + "INCREMENT 1 "\
+            + "MINVALUE 1 "\
+            + "MAXVALUE 9223372036854775807 "\
+            + "START 1 "\
+            + "CACHE 1;"\
+            + "ALTER TABLE prj_ecoute01_seq "\
+            + "OWNER TO postgres; "\
+            + "GRANT ALL ON TABLE prj_ecoute01_seq TO postgres; "\
+            + "COMMENT ON SEQUENCE prj_ecoute01_seq "\
+            + "IS 'Une ecoute va avoir une seule id_ecoute';"
+
 
         self.pg_not_select(create_query)
         print "table: prj_ecoute01 est CREEE"
 
-        
+        self.pg_not_select(create_seq)
 
         # mnw test we aiz no misi anlai fichier
 
@@ -889,14 +912,7 @@ class MainWindow(QtGui.QMainWindow):
                         ):
                         root_distant = "\\\\192.168.10.19\\voice\\"
                         print root_distant + chemin
-                        # sys.exit(0)
-                    # elif (
-                            # # self.samba_check_file(
-                                # # remote_file = chemin 
-                            # # ) == "\\\\192.168.10.19\\voice\\"
-                        # ):
-                        # root_distant = "\\\\192.168.10.19\\voice\\"
-                    else: # itest ao am Storage
+
                         samba_ = "\\\\mcuci\\Storage$\\"
                         file01 = Path(samba_ + chemin)
                         if (
@@ -1139,7 +1155,7 @@ class MainWindow(QtGui.QMainWindow):
         # for string in files:
             # self.sources.append(Phonon.MediaSource(string))
             
-        self.sources.append(Phonon.MediaSource('E:\\DISK_D\\mamitiana\\zik\\Nouveau dossier\\Sabre dance.mp3'))
+        self.sources.append(Phonon.MediaSource(files[0]))
 
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index])
@@ -1165,9 +1181,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # print self.combo_box__campagne.currentText()
 
-        list_call_date01 = \
-            self.lire_xlsx__get_call_date(
-                campgn = self.combo_box__campagne.currentText())
+        # list_call_date01 = \
+            # self.lire_xlsx__get_call_date(
+                # campgn = self.combo_box__campagne.currentText())
 
         self.etat_elemS(
             campg = True,
@@ -1178,9 +1194,9 @@ class MainWindow(QtGui.QMainWindow):
 
         print self.combo_box__campagne.currentText()
         print "#####################################"
-        print list_call_date01
-        list_call_date01 = list(set(list_call_date01))
-        list_call_date01 = sorted(list_call_date01)
+        # print list_call_date01
+        # list_call_date01 = list(set(list_call_date01))
+        # list_call_date01 = sorted(list_call_date01)
 
         self.table_campagne01 = str(self.campagne__table_campagne.get(
                 self.combo_box__campagne.currentText()
@@ -1581,6 +1597,18 @@ class MainWindow(QtGui.QMainWindow):
     def aboutToFinish(self):
         print "about to finish 65654654654"
         index = self.sources.index(self.mediaObject.currentSource()) + 1
+        play_finished = self.list__dl_fini_chemin_easycode[\
+            self.musicTable.selectionModel().selectedRows()[0].row()\
+        ][2]
+
+        req001 = "UPDATE prj_ecoute01 SET fini = 1 "\
+            +"WHERE chemin__a_partir_root = '" \
+            +play_finished+"';"
+        self.pg_not_select(
+            query01 = req001,
+            host = "127.0.0.1")
+
+
         if len(self.sources) > index:
             self.mediaObject.enqueue(self.sources[index])
 
@@ -1635,6 +1663,7 @@ class MainWindow(QtGui.QMainWindow):
             # self.check_existance_pg_int
             # self.add_single_song_to_playlist
             self.mount_samba_server
+            # self.to_del001
         )
 
         self.bouton_play_audio = QtGui.QPushButton(

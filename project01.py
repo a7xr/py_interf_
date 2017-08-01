@@ -12,9 +12,6 @@ from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui
 
 
-
-
-
 try:
     from PyQt4.phonon import Phonon
 except ImportError:
@@ -113,13 +110,14 @@ class MainWindow(QtGui.QMainWindow):
             self.clicked_playing = self.\
                 list__dl_fini_chemin_easycode[index.row()][2]
 
-
+        print "ti"
         print self.clicked_playing
+        print ""
 
         # sys.exit(0)
         req001 = "UPDATE prj_ecoute01 SET fini = 1 "\
             +"WHERE chemin__a_partir_root = '" \
-            +self.chemin_sans_root+"';"
+            +self.clicked_playing+"';"
 
         print req001
         self.pg_not_select(
@@ -384,6 +382,106 @@ class MainWindow(QtGui.QMainWindow):
             print ""
         # print "pg_select _ code 000012654564"
 
+    def double_clicked_qtable_at_dialog(self):
+        # izao ni algo anito atreto
+        # # mande mnw requete ani am bdd we aiz ao am bdd_pg_local no
+        # # # misi ni enreg izai voa double_click
+        # #
+        # # telechargena rah ohatra ka TSY ao ilay fichier tedavn
+        # # rah ohatra ka AO ilai fichier dia tsy mnw tlchgm intsony
+        # #
+        # # alefa vakina ilai enregistrement
+        # print "changed qtable at dialog"
+        index = len(self.sources)
+        print "index: " + str(index)
+        if self.sources:
+            self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
+
+        indexes = self.qtable_at_dialog.selectionModel().selectedRows()
+
+        # print "index024689361: " 
+
+        # ty indexes eto ambani ti dia type: PyQt4.QtCore.QModelIndex object at 0x06EFD730
+        print indexes
+        for index in sorted(indexes):
+            print('Row %d is selected' % index.row())
+            self.clicked_enreg = self.\
+                list__dl_fini_chemin_easycode[index.row()][2]
+        
+        # sys.exit(0)
+        req = "SELECT"\
+            +" root_distant, chemin__a_partir_root "\
+            +"FROM prj_ecoute01 "\
+            +"WHERE "\
+            +"chemin__a_partir_root "\
+            +"= '"\
+            +self.clicked_enreg\
+            +"';"
+        print req
+
+        self.pg_select(
+            query = req
+            )
+
+        self.full_path_read = ""
+        for row in self.rows_pg_local:
+            for i in range(len(row)):
+                if i == 1:
+                    self.chemin_sans_root = row[i]
+                self.full_path_read = \
+                    self.full_path_read + row[i]
+
+        # print "full_path: "
+        # print self.full_path_read
+
+        print ""
+        print ""
+        print ""
+        print self.root_local + self.chemin_sans_root
+        self.dl_fichier(
+            remote_file01 = self.full_path_read,
+            sauvegardee_dans = self.root_local + str(self.chemin_sans_root)[-55:]
+            )
+
+
+        # ty iz no mi_ajoutee ani am playlist
+        chemin_enreg__local01 = self.root_local \
+            + str(self.chemin_sans_root)[-55:]
+        # self.sources.append(
+            # Phonon.MediaSource(
+                # chemin_enreg__local01
+            # )
+        # )
+        self.add_single_song_to_playlist(
+            path_audio = chemin_enreg__local01
+            )
+
+
+        self.playlist.append(self.root_local + str(self.chemin_sans_root)[-55:])
+
+        print "playlist656546546:"
+        print len(self.playlist)
+        print self.playlist
+        # print "clicked somewhere"
+        # sys.exit(0)
+
+        ####eto
+        # rhf m_double_click anlay qtable01 dia mnw mis_a_jour anlay 
+        # # pg_local izai rattachee am self.chemin_sans_root
+        req001 = "UPDATE prj_ecoute01 SET telechargee = 1 "\
+            +"WHERE chemin__a_partir_root = '" \
+            +self.chemin_sans_root+"';"
+        print req001
+        self.pg_not_select(
+            query01 = req001,
+            host = "127.0.0.1")
+        # sys.exit(0)
+        self.dialog01.close()
+        self.double_clicked_multieasycode()
+
+        # self.dialog_enregistrement()
+
+
 
     def double_clicked_multieasycode(self):
         # print "double clicked multieasycode"
@@ -410,7 +508,8 @@ class MainWindow(QtGui.QMainWindow):
         + "WHERE table_campagne like '" \
         + self.table_campagne01 \
         + "' AND " + "multi_easycode=" \
-        + self.qtlist_multieasycode.currentItem().text()
+        + self.qtlist_multieasycode.currentItem().text()\
+        + "ORDER BY chemin__a_partir_root"
 
         # print "code654654654654: " 
         # print type(self.qtlist_multieasycode.currentItem().text())
@@ -1449,36 +1548,38 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def lire_xlsx__get_call_date(self, 
-            fichier_xlsx = 'file01.xlsx',
+            fichier_xlsx = 'E:\\DISK_D\\mamitiana\\kandra\\stuffs\\file01.xlsx',
             campgn = "0"):
         """
         va retourner les call_date qui sont reliees aa param_campgn
         """
-        res_list_call_date = []
+        res_list_call_date = [] 
 
         print "get call_date"
 
-        book = open_workbook(
-            fichier_xlsx   # ce fichier doit etre inclus Apres clique du bouton__importer_action
-                # pour le moment ceci n_est que pour le test
-            ) 
-        
-        sheet0 = book.sheet_by_index(0) 
+        if fichier_xlsx.is_file():
+            book = open_workbook(
+                fichier_xlsx   # ce fichier doit etre inclus Apres clique du bouton__importer_action
+                    # pour le moment ceci n_est que pour le test
+                ) 
+            
+            sheet0 = book.sheet_by_index(0) 
 
-        for i in range(1, sheet0.nrows):
-            if (sheet0.row_values(i, 0, 1)[0] == campgn):
-                res_list_call_date.append(
-                    sheet0.row_values(i, 1, 2)[0]
-                )
-            else:
-                pass
-        res_list_call_date 
-        return res_list_call_date
+            for i in range(1, sheet0.nrows):
+                if (sheet0.row_values(i, 0, 1)[0] == campgn):
+                    res_list_call_date.append(
+                        sheet0.row_values(i, 1, 2)[0]
+                    )
+                else:
+                    pass
+            res_list_call_date 
+            return res_list_call_date
 
     def click_extraire_audio(self):
         print "click extraire audio"
 
     def aboutToFinish(self):
+        print "about to finish 65654654654"
         index = self.sources.index(self.mediaObject.currentSource()) + 1
         if len(self.sources) > index:
             self.mediaObject.enqueue(self.sources[index])
@@ -1510,7 +1611,7 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         self.bouton_test = QtGui.QPushButton(
-            "Test"
+            "Monter les Serveurs"
         )
 
         self.bouton_reinit_elemS.clicked.connect(
@@ -1532,7 +1633,8 @@ class MainWindow(QtGui.QMainWindow):
             # self.del_all_sources
             # self.select_list_campagne
             # self.check_existance_pg_int
-            self.add_single_song_to_playlist
+            # self.add_single_song_to_playlist
+            self.mount_samba_server
         )
 
         self.bouton_play_audio = QtGui.QPushButton(
@@ -1670,6 +1772,11 @@ class MainWindow(QtGui.QMainWindow):
         # self.qtable_at_dialog.itemClicked.connect(
             # self.changed_clicked_qtable_at_dialog__to_del
         # )
+
+        self.qtable_at_dialog\
+            .doubleClicked.connect(
+                self.double_clicked_qtable_at_dialog
+            )
 
         for row in range(len(list__dl_fini_chemin_easycode)):
             for col in range(len(list__dl_fini_chemin_easycode[row])):

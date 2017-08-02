@@ -876,22 +876,12 @@ class MainWindow(QtGui.QMainWindow):
             multieasyc_i = sheet0.row_values(i, 0, 1)[0]
 
             # sys.exit(0)
+            # ti maka anlai chemin sans tenir compte du root_distant
             cheminS = self.select_chemin(
                 table_campagne = self.combo_box__campagne.currentText(),
                 multieasy = str(multieasyc_i)[:-2]
             );
-            # pour verifier que multieasyc_i est present
-                # if (
-                        # self.check_existance_pg_int (
-                            # table01 = "prj_ecoute01",
-                            # chp01 = "multi_easycode",
-                            # val = multieasyc_i
-                        # ) == False
-                    # ):
-                    # print "Tsy ao: " + str(multieasyc_i)
-                # else:
-                    # print "AO tsara: " + str(multieasyc_i)
-
+            
             # multieasyc_i dia meti manana enregistrement maro2
             # # ireto manaraka ireto ni chemin maka ani am enregistrement an_i easycode irai
             
@@ -904,6 +894,7 @@ class MainWindow(QtGui.QMainWindow):
                 for chemin in cheminS:
                     test_exist_fichier = self.root_distant + chemin
 
+                    # on cherche dans voice
                     samba_ = "\\\\192.168.10.19\\voice\\"
                     file01 = Path(samba_ + chemin)
                     if (
@@ -912,7 +903,7 @@ class MainWindow(QtGui.QMainWindow):
                         ):
                         root_distant = "\\\\192.168.10.19\\voice\\"
                         print root_distant + chemin
-
+                    else:
                         samba_ = "\\\\mcuci\\Storage$\\"
                         file01 = Path(samba_ + chemin)
                         if (
@@ -920,6 +911,10 @@ class MainWindow(QtGui.QMainWindow):
                             file01.is_file()
                         ):
                             root_distant = "\\\\mcuci\\Storage$\\"
+                        else:
+                            msg_box_information("Fichier inexistant",
+                                "Le fichier que vous cherchez n'existe pas")
+
 
                     # sys.exit(0)
                     if cpt_chm != (len(cheminS) - 1):
@@ -956,9 +951,30 @@ class MainWindow(QtGui.QMainWindow):
                     multieasyc_i
                     )
             else:
-
                 cpt_chm = 0
                 for chemin in cheminS:
+                    test_exist_fichier = self.root_distant + chemin
+
+                    # on cherche dans voice
+                    samba_ = "\\\\192.168.10.19\\voice\\"
+                    file01 = Path(samba_ + chemin)
+                    if (
+                            # ao am Voice
+                            file01.is_file()
+                        ):
+                        root_distant = "\\\\192.168.10.19\\voice\\"
+                        print root_distant + chemin
+                    else:
+                        samba_ = "\\\\mcuci\\Storage$\\"
+                        file01 = Path(samba_ + chemin)
+                        if (
+                            # ao am Voice
+                            file01.is_file()
+                        ):
+                            root_distant = "\\\\mcuci\\Storage$\\"
+                        else:
+                            msg_box_information("Fichier inexistant",
+                                "Le fichier que vous cherchez n'existe pas")
                     if cpt_chm != (len(cheminS) - 1):
                         query_insert += "( '"
                         query_insert += chemin + "', '" \
@@ -966,8 +982,8 @@ class MainWindow(QtGui.QMainWindow):
                         + root_distant + "', '"\
                         + telechargee + "', '"\
                         + fini + "', "\
-                        + str(int(multieasyc_i)) + ", '"\
-                        + self.table_campagne01\
+                        + str(int(multieasyc_i)) + ", '" \
+                        + str(self.table_campagne01)\
                         + "'), "
                     else:
                         query_insert += "( '"
@@ -986,12 +1002,13 @@ class MainWindow(QtGui.QMainWindow):
                 print ""
                 print ""
                 print ""
-                print "query_insert dans import_xls __code__005874: " + query_insert
+                print "query_insert dans import_xls __code__0001: " + query_insert
+
 
                 list_multieasycode.append(
                     multieasyc_i
                     )
-
+            # fin_else(else veut dire qu'on est AU dernier ligne du file.xlsx)
 
         print "query_insert dans import_xls __code002__: " + query_insert
 
@@ -1648,6 +1665,8 @@ class MainWindow(QtGui.QMainWindow):
                 # text01 = "akondro"
             # )
         )
+
+
         self.bouton_test.clicked.connect(
             # self.dl_fichier ## bouton_test_dl
             # self.select_fichier_dl
@@ -1894,6 +1913,15 @@ class MainWindow(QtGui.QMainWindow):
 
         #~ #instanciation by default
 
+        self.bouton_reinit_source = QtGui.QPushButton(
+            "Reinitialiser Playlist"
+        )
+        
+        self.bouton_reinit_source.clicked.connect(
+            self.del_all_sources
+        )
+
+
         self.musicTable = QtGui.QTableWidget(0, 4)
         self.musicTable.setStyleSheet(
             '''
@@ -1997,6 +2025,8 @@ class MainWindow(QtGui.QMainWindow):
         playbackLayout.addWidget(
             self.volumeSlider
         )
+
+        playbackLayout.addWidget(self.bouton_reinit_source)
 
 
         # dans _ def setupUi(self):

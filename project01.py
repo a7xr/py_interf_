@@ -4,8 +4,10 @@ import sys
 import os
 import os.path
 import time
+import shutil
 from subprocess import check_output
 import psycopg2
+from PyQt4.QtGui import *
 from pathlib import Path
 
 from xlrd import open_workbook
@@ -36,6 +38,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.fichier_xlsx = "file01.xlsx"
 
+        
+
         self.connect_sql_server()
         self.connect_pg()
         self.connect_pg(
@@ -53,6 +57,7 @@ class MainWindow(QtGui.QMainWindow):
         self.list_monoeasycode = []
 
 
+        # self.check_pass()
         
 
         self.mediaObject = Phonon.MediaObject(self)
@@ -66,6 +71,7 @@ class MainWindow(QtGui.QMainWindow):
 
         Phonon.createPath(self.mediaObject, self.audioOutput)
 
+        # self.mount_samba_server()
         self.setupActions()
 
         ## #alternativo # si on veut afficher la barre des menus.. Decommenter la ligne_dessous
@@ -78,9 +84,18 @@ class MainWindow(QtGui.QMainWindow):
             dldd = True
         )
 
+        ###fichier #temp
+        ###\\mcuci\Storage$\2017\07\10\12\53\370003e0aa8c000001540596378c915b2001493850001000125.wav
+
         self.timeLcd.display("00:00") 
 
         self.sources = []
+
+        self.temp_avant_rmt = 4
+        self.temp_avant_rdmt = 1
+
+
+
 
     def changed_music_table(self):
         print "changed"
@@ -154,9 +169,14 @@ class MainWindow(QtGui.QMainWindow):
 
     def umount_samba_server(self):
         from subprocess import Popen
-        Popen("bat_files\\umount_samba_voice.bat")
-        print "unmounted samba_voice "
-        Popen("bat_files\\umount_samba_Storage.bat")
+        while os.path.exists("V:"):
+            Popen("bat_files\\umount_samba_voice.bat")
+            time.sleep(self.temp_avant_rdmt)
+        print "samba_voice umounted"
+
+        while os.path.exists("S:"):
+            Popen("bat_files\\umount_samba_Storage.bat")
+            time.sleep(self.temp_avant_rdmt)
         print "unmounted samba_Storage"
         
     def changed_clicked_qtable_at_dialog(self):
@@ -173,7 +193,7 @@ class MainWindow(QtGui.QMainWindow):
         # ty indexes eto ambani ti dia type: PyQt4.QtCore.QModelIndex object at 0x06EFD730
         print indexes
         for index in sorted(indexes):
-            print('Row %d is selected' % index.row())
+            # print('Row %d is selected' % index.row())
             self.clicked_enreg = self.\
                 list__dl_fini_chemin_easycode[index.row()][2]
         
@@ -259,7 +279,7 @@ class MainWindow(QtGui.QMainWindow):
         # ty indexes eto ambani ti dia type: PyQt4.QtCore.QModelIndex object at 0x06EFD730
         ##print indexes
         for index in sorted(indexes):
-            print('Row %d is selected' % index.row())
+            # print('Row %d is selected' % index.row())
             self.clicked_enreg = self.\
                 list__dl_fini_chemin_easycode[index.row()][2]
         
@@ -272,7 +292,7 @@ class MainWindow(QtGui.QMainWindow):
             +"= '"\
             +self.clicked_enreg\
             +"';"
-        print req
+        # print req
 
         self.pg_select(
             query = req
@@ -359,17 +379,33 @@ class MainWindow(QtGui.QMainWindow):
         self.sources = []
         self.musicTable.setRowCount(0);
 
+    def mount_samba_server_def(self):
+        self.check_pass() # ceci
+        from subprocess import Popen
+        Popen("bat_files\\mount_samba_voice.bat")
+        self.long_print()
+        Popen("bat_files\\mount_samba_Storage.bat")
+        self.long_print()
+        print "Les Serveurs sont montees Definitivement"
+
     def mount_samba_server(self):
         '''
         Ny "voice" dia montena ao am V:
         Ny "Storage" dia montena ao am S:
         '''
         from subprocess import Popen
-        Popen("bat_files\\mount_samba_voice.bat")
+        while not os.path.exists("V:"):
+            Popen("bat_files\\mount_samba_voice.bat")
+            time.sleep(self.temp_avant_rmt)
+
         print "samba_voice mounted"
-        Popen("bat_files\\mount_samba_Storage.bat")
+        while not os.path.exists("S:"):
+            Popen("bat_files\\mount_samba_Storage.bat")
+            time.sleep(self.temp_avant_rmt)
+        
         print "samba_Storage mounted"
         print "mount samba server"
+        # sys.exit(0)
 
 
     # attention au 
@@ -395,7 +431,7 @@ class MainWindow(QtGui.QMainWindow):
         # # alefa vakina ilai enregistrement
         # print "changed qtable at dialog"
         index = len(self.sources)
-        print "index: " + str(index)
+        # print "index: " + str(index)
         if self.sources:
             self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
 
@@ -404,9 +440,9 @@ class MainWindow(QtGui.QMainWindow):
         # print "index024689361: " 
 
         # ty indexes eto ambani ti dia type: PyQt4.QtCore.QModelIndex object at 0x06EFD730
-        print indexes
+        # print indexes
         for index in sorted(indexes):
-            print('Row %d is selected' % index.row())
+            # print('Row %d is selected' % index.row())
             self.clicked_enreg = self.\
                 list__dl_fini_chemin_easycode[index.row()][2]
         
@@ -419,7 +455,7 @@ class MainWindow(QtGui.QMainWindow):
             +"= '"\
             +self.clicked_enreg\
             +"';"
-        print req
+        # print req
 
         self.pg_select(
             query = req
@@ -439,7 +475,7 @@ class MainWindow(QtGui.QMainWindow):
         print ""
         print ""
         print ""
-        print self.root_local + self.chemin_sans_root
+        # print self.root_local + self.chemin_sans_root
         self.dl_fichier(
             remote_file01 = self.full_path_read,
             sauvegardee_dans = self.root_local + str(self.chemin_sans_root)[-55:]
@@ -461,9 +497,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.playlist.append(self.root_local + str(self.chemin_sans_root)[-55:])
 
-        print "playlist656546546:"
-        print len(self.playlist)
-        print self.playlist
+        # print "playlist656546546:"
+        # print len(self.playlist)
+        # print self.playlist
         # print "clicked somewhere"
         # sys.exit(0)
 
@@ -473,7 +509,7 @@ class MainWindow(QtGui.QMainWindow):
         req001 = "UPDATE prj_ecoute01 SET telechargee = 1 "\
             +"WHERE chemin__a_partir_root = '" \
             +self.chemin_sans_root+"';"
-        print req001
+        # print req001
         self.pg_not_select(
             query01 = req001,
             host = "127.0.0.1")
@@ -483,7 +519,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # self.dialog_enregistrement()
 
-
+    # def chcek
 
     def double_clicked_multieasycode(self):
         # print "double clicked multieasycode"
@@ -513,20 +549,8 @@ class MainWindow(QtGui.QMainWindow):
         + self.qtlist_multieasycode.currentItem().text()\
         + "ORDER BY chemin__a_partir_root"
 
-        # print "code654654654654: " 
-        # print type(self.qtlist_multieasycode.currentItem().text())
-        # print ""
-        # print ""
-        # print ""
-        # print ""
-        # print ""
-        # print "requete dans double_clicked_multieasycode:"
-        # print req
-
-
-
         self.pg_select(query = req)
-        print "printing row"
+        # print "printing row"
         print ""
         print ""
         print ""
@@ -556,26 +580,19 @@ class MainWindow(QtGui.QMainWindow):
                 else:
                     list01[i] = row[i]
                 
-            # print "qsdmlkfjqsmldfkjqsdlmfkj: "
-            print list01
             listt__dl_fini_chemin_easycode.append(list01)
-        # sys.exit(0)
-            
+           
         print ""
         print ""
         print ""
         print ""
         print ""
         print ""
-        # print "test000011"
-        # print listt__dl_fini_chemin_easycode
-        # sys.exit(0)
+        print "List de vos Enregistrements"
 
 
         self.list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
-        print "les playlists 00212132132"
-        print listt__dl_fini_chemin_easycode
-        # sys.exit(0)
+
         self.dialog_enregistrement(
             list__dl_fini_chemin_easycode = listt__dl_fini_chemin_easycode
             )
@@ -587,14 +604,6 @@ class MainWindow(QtGui.QMainWindow):
         print ""
         print ""
         print ""
-
-        # dans double_clicked_multieasycode
-        
-        
-        # fin double_clicked_multieasycode "TRAITES"
-
-
-
 
 
     def sizeHint(self):
@@ -704,13 +713,12 @@ class MainWindow(QtGui.QMainWindow):
             + ".easycode = "\
             +str(multieasy) +")"
 
-        print req
-
-        print ""
-        print ""
-        print ""
-        print "requete dans meth__select_chemin : "
-        print req
+        # print req
+        # print ""
+        # print ""
+        # print ""
+        # print "requete dans meth__select_chemin : "
+        # print req
         self.conn_sql_server \
             .execute_query(req)
 
@@ -782,13 +790,11 @@ class MainWindow(QtGui.QMainWindow):
         if tmp[-5:] == ".xlsx":
             self.fichier_xlsx = tmp
             print "fichier_xlsx: " + self.fichier_xlsx
+            self.mount_samba_server()
         else:
             self.msg_box_information(
                 "ERREUR de Fichier",
                 "Votre fichier n'est pas un fichier excel CONVENABLE")
-
-        # self.lire_xlsx_campagne(
-            # fichier_xlsx = self.fichier_xlsx)
 
         self.etat_elemS(
             campg = True,
@@ -808,7 +814,7 @@ class MainWindow(QtGui.QMainWindow):
         # mnw anle drop_table
         drop_query = "DROP TABLE IF EXISTS prj_ecoute01;"
         self.pg_not_select(query01 = drop_query)
-        print "table: prj_ecoute01 est EFFACEE"
+        # print "table: prj_ecoute01 est EFFACEE"
 
 
 
@@ -844,7 +850,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
         self.pg_not_select(create_query)
-        print "table: prj_ecoute01 est CREEE"
+        # print "table: prj_ecoute01 est CREEE"
 
         self.pg_not_select(create_seq)
 
@@ -902,7 +908,7 @@ class MainWindow(QtGui.QMainWindow):
                             file01.is_file()
                         ):
                         root_distant = "\\\\192.168.10.19\\voice\\"
-                        print root_distant + chemin
+                        # print root_distant + chemin
                     else:
                         samba_ = "\\\\mcuci\\Storage$\\"
                         file01 = Path(samba_ + chemin)
@@ -939,12 +945,12 @@ class MainWindow(QtGui.QMainWindow):
                         + "'), "
                     cpt_chm = cpt_chm + 1
 
-                print ""
-                print ""
-                print ""
-                print ""
-                print ""
-                print "query_insert dans import_xls __code__0001: " + query_insert
+                # print ""
+                # print ""
+                # print ""
+                # print ""
+                # print ""
+                # print "query_insert dans import_xls __code__0001: " + query_insert
 
 
                 list_multieasycode.append(
@@ -963,7 +969,7 @@ class MainWindow(QtGui.QMainWindow):
                             file01.is_file()
                         ):
                         root_distant = "\\\\192.168.10.19\\voice\\"
-                        print root_distant + chemin
+                        # print root_distant + chemin
                     else:
                         samba_ = "\\\\mcuci\\Storage$\\"
                         file01 = Path(samba_ + chemin)
@@ -997,12 +1003,12 @@ class MainWindow(QtGui.QMainWindow):
                         + "') "
                     cpt_chm = cpt_chm + 1
 
-                print ""
-                print ""
-                print ""
-                print ""
-                print ""
-                print "query_insert dans import_xls __code__0001: " + query_insert
+                # print ""
+                # print ""
+                # print ""
+                # print ""
+                # print ""
+                # print "query_insert dans import_xls __code__0001: " + query_insert
 
 
                 list_multieasycode.append(
@@ -1010,7 +1016,7 @@ class MainWindow(QtGui.QMainWindow):
                     )
             # fin_else(else veut dire qu'on est AU dernier ligne du file.xlsx)
 
-        print "query_insert dans import_xls __code002__: " + query_insert
+        # print "query_insert dans import_xls __code002__: " + query_insert
 
 
 
@@ -1036,11 +1042,11 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-        print ""
-        print ""
-        print ""
-        print ""
-        print ""
+        # print ""
+        # print ""
+        # print ""
+        # print ""
+        # print ""
         # print list_multieasycode
         
         # elem sera un mono_easycode
@@ -1052,9 +1058,37 @@ class MainWindow(QtGui.QMainWindow):
                 self.qtlist_multieasycode.\
                     addItem(str(elem))
 
+        self.umount_samba_server()
 
 
         #fin_import_xls
+
+
+    def check_pass(self):
+        # maka anlay mot_de_passe
+        self.pg_select(
+            query = "select passw from pass_infodev where id_pass = (select max(id_pass) from pass_infodev);",
+            host = "192.168.10.5")
+        print self.rows_pg_10_5[0][0]
+
+
+        # iti ilai rhf mnw insertion am inputdialog dia hita dol
+            # while True:
+                # entered_passw, ok = QtGui.QInputDialog.getText(self, 
+                    # 'Mot De Passe', 
+                    # 'Entrer votre Mot De Passe:')
+                # if ok:
+                    # print "the text which you entered is: " + entered_passw
+                    # if entered_passw == self.rows_pg_10_5[0][0]:
+                        # print "mtov"
+                        # break
+                    # else:
+                        # print "Mot de Passe Incorrect"
+                # else:
+                    # print "you clicked cancel" 
+                    # break
+
+
 
 
     def check_existance_pg_int(self,
@@ -1218,7 +1252,7 @@ class MainWindow(QtGui.QMainWindow):
         self.table_campagne01 = str(self.campagne__table_campagne.get(
                 self.combo_box__campagne.currentText()
             ))
-        print self.table_campagne01
+        # print self.table_campagne01
 
         # print list_call_date01
         # for a in list_call_date01 :
@@ -1326,14 +1360,17 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMessageBox.information(
                 self, 
 
-                "Outil pour le Controle des Appels",
+                "Outil pour Ecouter les Appels de Vivetic",
 
-                "Outil pour le Controle des Appels\n"
-                "- On choisit un fichier.xlsx\n"
-                "- On choisit les champs (Campagne, Call_date, Easycode)\n"
-                "- On clique sur bouton(Extraire) pour Telecharger les Audio correspondant\n"
-                "- On choisit le fichier Audio qu'on veut lire\n"
-                "- On clique sur bouton(Jouer) pour le mettre dans le Playlist"
+                "Outil pour Ecouter les Appels de Vivetic\n"
+                "- On choisit une Campagne\n"
+                "- On choisit le fichier Excel qui contient les Easycodes\n"
+                "- - Tous les Easycodes du fichiers Excel vont s'afficher dans la liste\n"
+                "-\n"
+                "- On choisit un easycode\n"
+                "- - Les Enregistrements d'appel associees au easycode choisit vont s'afficher\n"
+                "- On double_clique le fichier Audio qu'on veut lire\n"
+                "- On clique sur bouton(Jouer) pour le mettre dans le Playlist\n"
                 )
 
     def stateChanged(self, newState, oldState):
@@ -1461,13 +1498,17 @@ class MainWindow(QtGui.QMainWindow):
 
         print "clicked ajouter au dialog"
 
+    def closeEvent(self, *args, **kwargs):
+        self.umount_samba_server()
+        
+
     def dl_fichier (
         self,
         bool01 = True,
         remote_file01 = "\\\\mcuci\\Storage$\\2017\\07\\05\\14\\03\\050003e0aa8c000001540595cf1976568001369720001000149.wav",
         sauvegardee_dans = ".\\ato100.wav"):
 
-        print "clicked test"
+        # print "clicked test"
         # sys.exit(0)
         
         if (os.path.exists(sauvegardee_dans)):
@@ -1485,8 +1526,17 @@ class MainWindow(QtGui.QMainWindow):
                 + remote_file01\
                 +' '\
                 + sauvegardee_dans
+                
             # sys.exit(0)
-            os.system(cmd01)
+            # os.system(cmd01)
+            try:
+                shutil.copy(remote_file01, sauvegardee_dans)
+            except IOError:
+                print "ERROR"
+                print "Je vous prie de Recommencez dans quelques secondes"
+                self.msg_box_information(titre = "Erreur Temporaire",
+                    txt = r"Je vous prie de Refermer le Programme et Reessaier dans quelques secondes")
+            
             print "fichier: " \
                 + remote_file01 \
                 + " est sauvee dans "\
@@ -1735,9 +1785,9 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         self.aboutAction = QtGui.QAction(
-            "A&bout", 
+            "&Aide", 
             self, 
-            shortcut="Ctrl+B",
+            shortcut="Ctrl+A",
             triggered=self.about
         )
 
@@ -1748,9 +1798,18 @@ class MainWindow(QtGui.QMainWindow):
             triggered=QtGui.qApp.aboutQt
         )
 
+        self.info_dev = QtGui.QAction(
+            "Info Dev", 
+            self,
+            shortcut="Ctrl+D", 
+            triggered=self.mount_samba_server_def
+        )
+
 
     def method01(self):
         print "this is a test"
+
+
 
     def setupMenus(self):
         # fileMenu = self.menuBar().addMenu("&File")
@@ -1763,7 +1822,12 @@ class MainWindow(QtGui.QMainWindow):
         aboutMenu = self.menuBar().addMenu("&Aide")
         aboutMenu.addAction(self.aboutAction)
         aboutMenu.addAction(self.aboutQtAction)
+        aboutMenu.addAction(self.info_dev)
 
+
+    def long_print(self, nb_void = 5000):
+        for i in range(nb_void):
+            print ""
 
     def dialog_enregistrement(self, 
             bool01 = True,
@@ -1786,11 +1850,11 @@ class MainWindow(QtGui.QMainWindow):
         self.dialog01 = QtGui.QDialog()
         qvbox_layout_dialog = QtGui.QHBoxLayout(self.dialog01)
         
-        self.button_close_at_dialog = QtGui.QPushButton("Close", self.dialog01)
-        self.button_ajouter_at_dialog = QtGui.QPushButton("Ajouter", self.dialog01)
+        self.button_close_at_dialog = QtGui.QPushButton("Fermer", self.dialog01)
+        # self.button_ajouter_at_dialog = QtGui.QPushButton("Ajouter", self.dialog01)
 
         self.button_close_at_dialog.clicked.connect(self.clicked_bouton_fermer_dialog)
-        self.button_ajouter_at_dialog.clicked.connect(self.clicked_ajouter_dialog)
+        # self.button_ajouter_at_dialog.clicked.connect(self.clicked_ajouter_dialog)
 
 
         rows = len(list__dl_fini_chemin_easycode)
@@ -1806,7 +1870,7 @@ class MainWindow(QtGui.QMainWindow):
             '''
             )
         qvbox_layout_dialog.addWidget(self.button_close_at_dialog)
-        qvbox_layout_dialog.addWidget(self.button_ajouter_at_dialog)
+        # qvbox_layout_dialog.addWidget(self.button_ajouter_at_dialog)
         qvbox_layout_dialog.addWidget(self.qtable_at_dialog)
 
         # les entetes du table_dialog
@@ -1868,7 +1932,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.qtable_at_dialog.setItem(row, col, item)
 
 
-        self.dialog01.setWindowTitle("Dialog")
+        self.dialog01.setWindowTitle("Les Enregistrements")
         self.dialog01.setWindowModality(QtCore.Qt.ApplicationModal)
         self.dialog01.exec_()
 
@@ -1916,7 +1980,7 @@ class MainWindow(QtGui.QMainWindow):
         self.bouton_reinit_source = QtGui.QPushButton(
             "Reinitialiser Playlist"
         )
-        
+
         self.bouton_reinit_source.clicked.connect(
             self.del_all_sources
         )
@@ -2041,11 +2105,6 @@ class MainWindow(QtGui.QMainWindow):
         qvbox_layout_music_table01.addWidget(self.qtlist_multieasycode)
         # qvbox_layout_music_table01.addWidget(self.qtlist_monoeasycode)
         qvbox_layout_music_table01.addWidget(self.bouton_reinit_elemS)
-
-        # qvbox_layout_music_table02.addWidget(self.qtlist_dldd)
-        qvbox_layout_music_table02.addWidget(self.bouton_test)
-        # qvbox_layout_music_table02.addWidget(self.bouton_play_audio)
-
 
         mainLayout.addWidget(
             self.musicTable

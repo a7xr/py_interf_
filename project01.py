@@ -2,6 +2,7 @@ import sip
 sip.setapi('QString', 2)
 import sys
 import os
+import logging
 import os.path
 import time
 import shutil
@@ -36,9 +37,23 @@ class MainWindow(QtGui.QMainWindow):
         	self
         )
 
-        self.fichier_xlsx = "file01.xlsx"
 
+
+        self.log_file = ".\log_ecoute_enreg.log"
+        logging.basicConfig(
+            filename=self.log_file,
+            level=logging.DEBUG,
+            format='%(asctime)s : %(levelname)s : %(message)s'
+        )
+
+
+
+        # self.max_size_log = 74492L
+        self.max_size_log = 5000000L
+        self.handle_file_log()
         
+
+        self.fichier_xlsx = "file01.xlsx"
 
         self.connect_sql_server()
         self.connect_pg()
@@ -81,7 +96,8 @@ class MainWindow(QtGui.QMainWindow):
             campg = True,
             multieasyc = True,
             monoeasyc = True,
-            dldd = True
+            dldd = True,
+            import_xls_action = False
         )
 
         ###fichier #temp
@@ -91,8 +107,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.sources = []
 
-        self.temp_avant_rmt = 4
+        self.temp_avant_rmt = 5
         self.temp_avant_rdmt = 1
+
 
 
 
@@ -158,6 +175,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def etat_elemS(self,
             campg = False,
+            import_xls_action = False,
             multieasyc = False,
             monoeasyc = False,
             dldd = False):
@@ -165,19 +183,23 @@ class MainWindow(QtGui.QMainWindow):
         self.qtlist_multieasycode.setEnabled(multieasyc)
         
         self.qtlist_dldd.setEnabled(dldd)
+
+        self.import_action.setEnabled(import_xls_action)
         print ""
 
     def umount_samba_server(self):
         from subprocess import Popen
         while os.path.exists("V:"):
-            Popen("bat_files\\umount_samba_voice.bat")
+            Popen("encodings_app\\umount_samba_voice.bat")
+            # os.system("net use S: \\\\mcuci\\Storage$ V1v3t1C /USER:mcuci\\it")
             time.sleep(self.temp_avant_rdmt)
-        print "samba_voice umounted"
+        self.logging_n_print( txt = "Samba_voice_10.19 UNmounted", type_log = "info")
 
         while os.path.exists("S:"):
-            Popen("bat_files\\umount_samba_Storage.bat")
+            Popen("encodings_app\\umount_samba_Storage.bat")
             time.sleep(self.temp_avant_rdmt)
         print "unmounted samba_Storage"
+        self.logging_n_print( txt = "Samba_Storage UNmounted", type_log = "info")
         
     def changed_clicked_qtable_at_dialog(self):
         print "changed qtable at dialog"
@@ -248,9 +270,7 @@ class MainWindow(QtGui.QMainWindow):
         # print "clicked somewhere"
         # sys.exit(0)
 
-        ####eto
-        # rhf m_double_click anlay qtable01 dia mnw mis_a_jour anlay 
-        # # pg_local izai rattachee am self.chemin_sans_root
+       
         req001 = "UPDATE prj_ecoute01 SET telechargee = 1 "\
             +"WHERE chemin__a_partir_root = '" \
             +self.chemin_sans_root+"';"
@@ -328,9 +348,7 @@ class MainWindow(QtGui.QMainWindow):
         # print "clicked somewhere"
         # sys.exit(0)
 
-        ####eto
-        # rhf m_double_click anlay qtable01 dia mnw mis_a_jour anlay 
-        # # pg_local izai rattachee am self.chemin_sans_root
+        
         req001 = "UPDATE prj_ecoute01 SET telechargee = 1 "\
             +"WHERE chemin__a_partir_root = '" \
             +self.chemin_sans_root+"';"
@@ -375,17 +393,28 @@ class MainWindow(QtGui.QMainWindow):
             # self.metaInformationResolver.setCurrentSource(self.sources[index - 1])
 
 
+    def clicked_ok_at_dialog_passw(self):
+        if self.qline_entered_passw.text() == self.rows_pg_10_5[0][0] :
+            self.right_passw = True
+            self.dialog_passw.close()
+            print "here eeeeehhhhhhh"
+        else:
+            pass
+
     def del_all_sources(self):
         self.sources = []
         self.musicTable.setRowCount(0);
 
     def mount_samba_server_def(self):
-        self.check_pass() # ceci
+        
+        # iti dia hnw boucle_INFINI eto rah ohatra ka tsy marina ny mdp nomena
+        self.check_pass()
+
         from subprocess import Popen
-        Popen("bat_files\\mount_samba_voice.bat")
-        self.long_print()
-        Popen("bat_files\\mount_samba_Storage.bat")
-        self.long_print()
+        Popen("encodings_app\\mount_samba_voice.bat")
+        # self.long_print()
+        Popen("encodings_app\\mount_samba_Storage.bat")
+        # self.long_print()
         print "Les Serveurs sont montees Definitivement"
 
     def mount_samba_server(self):
@@ -395,16 +424,24 @@ class MainWindow(QtGui.QMainWindow):
         '''
         from subprocess import Popen
         while not os.path.exists("V:"):
-            Popen("bat_files\\mount_samba_voice.bat")
+            Popen("encodings_app\\mount_samba_voice.bat")
+            self.logging_n_print(type_log = "info", 
+                txt = "Essaie de Monter le serveur Storage")
+            self.long_print()
             time.sleep(self.temp_avant_rmt)
 
-        print "samba_voice mounted"
+        self.logging_n_print( type_log = "info", txt="samba_Voice Mounted")
+
         while not os.path.exists("S:"):
-            Popen("bat_files\\mount_samba_Storage.bat")
+            Popen("encodings_app\\mount_samba_Storage.bat")
+            self.logging_n_print(type_log = "info", 
+                txt = "Essaie de Monter le serveur Voice_10.19")
+            self.long_print()
             time.sleep(self.temp_avant_rmt)
         
-        print "samba_Storage mounted"
-        print "mount samba server"
+
+        self.logging_n_print( type_log = "info", txt="mount samba server")
+        
         # sys.exit(0)
 
 
@@ -497,15 +534,16 @@ class MainWindow(QtGui.QMainWindow):
 
         self.playlist.append(self.root_local + str(self.chemin_sans_root)[-55:])
 
+        self.logging_n_print(type_log = "info", 
+            txt = "Ajoutee au Playlist: "+self.root_local + str(self.chemin_sans_root)[-55:])
+
         # print "playlist656546546:"
         # print len(self.playlist)
         # print self.playlist
         # print "clicked somewhere"
         # sys.exit(0)
 
-        ####eto
-        # rhf m_double_click anlay qtable01 dia mnw mis_a_jour anlay 
-        # # pg_local izai rattachee am self.chemin_sans_root
+        
         req001 = "UPDATE prj_ecoute01 SET telechargee = 1 "\
             +"WHERE chemin__a_partir_root = '" \
             +self.chemin_sans_root+"';"
@@ -548,6 +586,10 @@ class MainWindow(QtGui.QMainWindow):
         + "' AND " + "multi_easycode=" \
         + self.qtlist_multieasycode.currentItem().text()\
         + "ORDER BY chemin__a_partir_root"
+
+        self.logging_n_print(type_log = "info",
+            txt = "Easycode: "+self.qtlist_multieasycode.currentItem().text()
+        )
 
         self.pg_select(query = req)
         # print "printing row"
@@ -628,9 +670,13 @@ class MainWindow(QtGui.QMainWindow):
             database=database01)
 
         if self.conn_sql_server :
-            print "connection ok au sql_server!"
+            self.logging_n_print(type_log = "info", 
+                txt = "connection ok au sql_server!")
+            # logging.info('I told you so')  # will not print anything
         else :
-            print "connection au sql_server ECHOUEE"
+            self.logging_n_print (
+                type_log = "info",
+                txt = "connection au sql_server ECHOUEE")
 
 
     def extract01(self,
@@ -678,6 +724,20 @@ class MainWindow(QtGui.QMainWindow):
         
         print ""
 
+    def has_access_to_server(self):
+        if not (os.path.exists("\\\\mcuci\\Storage$")):
+            self.msg_box_information(
+                "Probleme d'Access au Serveur",
+                "Vous n'avez pas Access au serveur Storage"
+            )
+            sys.exit(0)
+        else:
+            if not (os.path.exists("\\\\192.168.10.19\\voice\\")):
+                self.msg_box_information(
+                "Probleme d'Access au Serveur",
+                "Vous n'avez pas Access au serveur Voice"
+            )
+                sys.exit(0)
 
         
     def msg_box_information(self, titre, txt):
@@ -719,8 +779,15 @@ class MainWindow(QtGui.QMainWindow):
         # print ""
         # print "requete dans meth__select_chemin : "
         # print req
-        self.conn_sql_server \
-            .execute_query(req)
+        try:
+            self.conn_sql_server \
+                .execute_query(req)
+        except _mssql.MSSQLDatabaseException:
+            self.msg_box_information(
+                 "Relation fichier Excel et la Campagne choisie",
+                "La Campagne que vous avez choisie n'est PAS Compatible au fichier Excel" \
+                + "\n- Erreur dans SQL_Serveur"
+                )
 
         #dans select_chemin
 
@@ -732,9 +799,6 @@ class MainWindow(QtGui.QMainWindow):
         return plusieurs_monoeasy
         #fin select_chemin
 
-
-    def to_del001(self):
-        self.add_single_song_to_playlist('qsdfqsdf')
 
     def import_xls(self,
             bool01 = True,
@@ -766,10 +830,15 @@ class MainWindow(QtGui.QMainWindow):
         index = len(self.sources)
 
         if len (files) != 1:
-            print "Vous avez choisit plusieurs fichiers... Veuillez choisir qu'une seule"
+            # print "Vous avez choisit plusieurs fichiers... Veuillez choisir qu'une seule"
+            self.logging_n_print(
+                type_log = "warning",
+                txt = "Vous avez choisit plusieurs fichiers... Veuillez choisir qu'une seule")
+
+            self.logging_n_print(txt = ' _ '.join(files))
+
             QtGui.QMessageBox.information(
                 self, 
-
                 "Erreur d'Import de fichier", 
                 "Erreur d'Import de fichier\n"
                 "- Veuillez choisir qu'une seule fichier"
@@ -790,6 +859,7 @@ class MainWindow(QtGui.QMainWindow):
         if tmp[-5:] == ".xlsx":
             self.fichier_xlsx = tmp
             print "fichier_xlsx: " + self.fichier_xlsx
+            self.logging_n_print(txt = "Fichier Excel Importee: " + self.fichier_xlsx)
             self.mount_samba_server()
         else:
             self.msg_box_information(
@@ -800,7 +870,8 @@ class MainWindow(QtGui.QMainWindow):
             campg = True,
             multieasyc = True,
             monoeasyc = True,
-            dldd = True
+            dldd = True,
+            import_xls_action = True
         )
 
         book = open_workbook(
@@ -1021,7 +1092,16 @@ class MainWindow(QtGui.QMainWindow):
 
 
         # ty tsy olana fa ilai fanamboarana anlai requete no enjana
-        self.cursor_pg_local.execute(query_insert)
+        try:
+            self.cursor_pg_local.execute(query_insert)
+        except psycopg2.ProgrammingError:
+            self.umount_samba_server()
+            self.msg_box_information(
+                "Relation fichier Excel et la Campagne choisie",
+                "La Campagne que vous avez choisie n'est PAS Compatible au fichier Excel" \
+                + "\n- Erreur dans Psycopg"
+            )
+            sys.exit(0)
 
         # eto ni mnw insertion
         self.connect_pg_local.commit()
@@ -1059,18 +1139,99 @@ class MainWindow(QtGui.QMainWindow):
                     addItem(str(elem))
 
         self.umount_samba_server()
-
-
         #fin_import_xls
+
+
+    ####eto
+    # asio log_file
+    # # mbola lava b io... jereo we inn dol ni affichage tsara loggena
+    # # ni vita farany zan d hoe: rhf mnw import_xls
+    # atov ani anaty fichier_conf
+    # # ti mbola ketrika hafa mitsn
+    def handle_file_log(self):
+        
+        if (os.path.exists(self.log_file)):
+            statinfo = os.stat(self.log_file)
+            if statinfo.st_size > self.max_size_log:
+                os.remove(self.log_file)
+                open(self.log_file, 'a').close()
+
+        print ""
+
+    def logging_n_print(self, 
+            bool01 = True,
+            type_log = "info", # OU warning OU debug
+            txt = "text",
+            log_only = True):
+
+        if(type_log == "warning"):
+            logging.warning(txt)
+            if log_only == False:
+                print txt
+            
+
+        elif (type_log == "info"):
+            logging.info(txt)
+            if log_only == False:
+                print txt
+
+        elif ((type_log == "debug") & (log_only == False)):
+            logging.debug(txt)
+            if log_only == False:
+                print txt
+
+        elif ((type_log == "debug") & (log_only == True)):
+            logging.debug(txt)
+            if log_only == False:
+                print txt
 
 
     def check_pass(self):
         # maka anlay mot_de_passe
         self.pg_select(
-            query = "select passw from pass_infodev where id_pass = (select max(id_pass) from pass_infodev);",
+            query = "SELECT passw FROM pass_infodev WHERE id_pass = (SELECT MAX(id_pass) FROM pass_infodev);",
             host = "192.168.10.5")
         print self.rows_pg_10_5[0][0]
 
+        self.right_passw = False
+        while True:
+            
+            self.dialog_passw = QtGui.QDialog()
+            self.dialog_passw.setWindowTitle("Mot de Passe")
+            self.dialog_passw.setMinimumSize(300, 50)
+            qvbox_layout_dailog_passw = QtGui.QHBoxLayout(self.dialog_passw)
+            self.button_ok_at_dialog_passw = QtGui.QPushButton("OK", self.dialog_passw)
+            self.button_ok_at_dialog_passw.clicked.connect(self.clicked_ok_at_dialog_passw)
+            self.qline_entered_passw = QLineEdit(self.dialog_passw)
+            self.qline_entered_passw.setEchoMode(QLineEdit.Password)
+            
+            qvbox_layout_dailog_passw.addWidget(self.button_ok_at_dialog_passw)
+            qvbox_layout_dailog_passw.addWidget(self.qline_entered_passw)
+            self.dialog_passw.exec_()
+            self.logging_n_print(type_log = "warning",
+                    txt = "Tentation d'Entree dans zone Info_Dev")
+            if self.qline_entered_passw.text() == self.rows_pg_10_5[0][0] :
+                self.logging_n_print(type_log = "info",
+                    txt = "Entree Reussite dans zone Info_Dev")
+                break
+            else:
+                self.logging_n_print(type_log = "warning",
+                    txt = "Echec d'entree dans zone Info_Dev _ MDP: " \
+                        + self.qline_entered_passw.text()
+                )
+                pass
+            if self.right_passw == True:
+                self.logging_n_print(type_log = "info",
+                    txt = "Entree Reussite dans zone Info_Dev")
+                break
+            else:
+                self.logging_n_print(type_log = "warning",
+                    txt = "Echec d'entree dans zone Info_Dev _ MDP: " \
+                        + self.qline_entered_passw.text()
+                )
+                pass
+
+        # print self.qline_entered_passw.text()
 
         # iti ilai rhf mnw insertion am inputdialog dia hita dol
             # while True:
@@ -1175,7 +1336,7 @@ class MainWindow(QtGui.QMainWindow):
 
             self.cursor_pg_local = self.connect_pg_local.cursor()
 
-            print "connection ok au postgresql LOCAL"
+            self.logging_n_print (txt = "connection ok au postgresql LOCAL")
         elif(server01 == '192.168.10.5'):
             self.connect_pg_10_5 = psycopg2.connect(
                 "dbname=" + database01
@@ -1187,7 +1348,7 @@ class MainWindow(QtGui.QMainWindow):
 
             self.cursor_pg_10_5 = self.connect_pg_10_5.cursor()
 
-            print "connection ok au postgresql 192.168.10.5"
+            self.logging_n_print (txt = "connection ok au postgresql 192.168.10.5")
 
      
             
@@ -1244,10 +1405,19 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         print self.combo_box__campagne.currentText()
+        self.etat_elemS(
+            campg = True,
+            multieasyc = True,
+            monoeasyc = True,
+            dldd = True,
+            import_xls_action = True
+        )
         print "#####################################"
         # print list_call_date01
         # list_call_date01 = list(set(list_call_date01))
         # list_call_date01 = sorted(list_call_date01)
+        tmp_txt = "Choix Campagne: " + self.combo_box__campagne.currentText()
+        self.logging_n_print(txt = tmp_txt)
 
         self.table_campagne01 = str(self.campagne__table_campagne.get(
                 self.combo_box__campagne.currentText()
@@ -1500,7 +1670,43 @@ class MainWindow(QtGui.QMainWindow):
 
     def closeEvent(self, *args, **kwargs):
         self.umount_samba_server()
+        for i in range(3):
+            self.logging_n_print(txt = "")
+        self.logging_n_print(txt = "closed")
+        for i in range(3):
+            self.logging_n_print(txt = "")
+
+    def to_del001(self):
+        # self.dialog_passw = QtGui.QDialog()
+        # flo = QFormLayout(self.dialog_passw)
+        # e1 = QLineEdit()
+        # self.button_ok_dialog_passw = QtGui.QPushButton(
+            # "OK"
+        # )
+        # self.button_annuler_dialog_passw = QtGui.QPushButton(
+            # "Annuler"
+        # )
+        # flo.addRow("Mot De Passe: ", e1)
+        # flo.addRow(self.button_ok_dialog_passw)
+        # flo.addRow(self.button_annuler_dialog_passw)
+        # # win = QWidget()
+        # # win.setLayout(flo)
+        # # win.show()
+        # raw_input("ato")
+        # print e1.text()
+
+        self.dialog_passw = QtGui.QDialog()
+        self.dialog_passw.setMinimumSize(300, 50)
+        qvbox_layout_dailog_passw = QtGui.QHBoxLayout(self.dialog_passw)
+        self.button_ok_at_dialog_passw = QtGui.QPushButton("OK", self.dialog_passw)
+        self.button_ok_at_dialog_passw.clicked.connect(self.clicked_ok_at_passw)
+        self.qline_entered_passw = QLineEdit(self.dialog_passw)
+        self.qline_entered_passw.setEchoMode(QLineEdit.Password)
         
+        qvbox_layout_dailog_passw.addWidget(self.button_ok_at_dialog_passw)
+        qvbox_layout_dailog_passw.addWidget(self.qline_entered_passw)
+        self.dialog_passw.exec_()
+
 
     def dl_fichier (
         self,
@@ -1522,25 +1728,42 @@ class MainWindow(QtGui.QMainWindow):
                 # print type (sauvegardee_dans)
                 # print sauvegardee_dans
             
-            cmd01 = 'smbget '\
-                + remote_file01\
-                +' '\
-                + sauvegardee_dans
+            # cmd01 = 'smbget '\
+                # + remote_file01\
+                # +' '\
+                # + sauvegardee_dans
                 
             # sys.exit(0)
             # os.system(cmd01)
             try:
                 shutil.copy(remote_file01, sauvegardee_dans)
             except IOError:
-                print "ERROR"
-                print "Je vous prie de Recommencez dans quelques secondes"
-                self.msg_box_information(titre = "Erreur Temporaire",
-                    txt = r"Je vous prie de Refermer le Programme et Reessaier dans quelques secondes")
-            
-            print "fichier: " \
-                + remote_file01 \
-                + " est sauvee dans "\
-                + sauvegardee_dans
+                # print "ERROR"
+                # print "Je vous prie de Recommencez dans quelques secondes"
+                # self.msg_box_information(titre = "Erreur Temporaire",
+                    # txt = r"Je vous prie de Refermer le Programme et Reessaier dans quelques secondes")
+                # self.logging_n_print(type_log = "debug",
+                    # txt = "Fichier Inexistant: " + remote_file01
+                    # )
+                #                 
+                # print "fichier: " \
+                # + remote_file01 \
+                # + " est sauvee dans "\
+                # + sauvegardee_dans
+
+                self.logging_n_print(type_log = "debug", 
+                    txt = "IOError lors du Telechargement du Fichier: " + remote_file01
+                )
+                self.msg_box_information("Veuillez Patienter",
+                    r"Telechargement aa du Serveur")
+                self.mount_samba_server()
+                try:
+                    shutil.copy(remote_file01, sauvegardee_dans)
+                except IOError:
+                    print "ooops IOError"
+                finally:
+                    self.umount_samba_server()
+
 
     def metaStateChanged(self, newState, oldState):
         if newState == Phonon.ErrorState:
@@ -1627,6 +1850,13 @@ class MainWindow(QtGui.QMainWindow):
             self.qtlist_multieasycode.takeItem(i)
             self.qtlist_multieasycode.takeItem(i)
             self.qtlist_multieasycode.takeItem(i)
+        self.etat_elemS(
+            campg = True,
+            multieasyc = True,
+            monoeasyc = True,
+            dldd = True,
+            import_xls_action = False
+        )
 
 
 
@@ -1801,14 +2031,21 @@ class MainWindow(QtGui.QMainWindow):
         self.info_dev = QtGui.QAction(
             "Info Dev", 
             self,
-            shortcut="Ctrl+D", 
+            shortcut="Ctrl+Shift+Alt+M", 
             triggered=self.mount_samba_server_def
         )
+
 
 
     def method01(self):
         print "this is a test"
 
+    def keyPressEvent(self, event):
+    # Did the user press the Escape key?
+        if event.key() == (QtCore.Qt.Key_Control and QtCore.Qt.Key_Shift and QtCore.Qt.Key_M and QtCore.Qt.Key_S and QtCore.Qt.Key_N): # QtCore.Qt.Key_Escape is a value that equates to what the operating system passes to python from the keyboard when the escape key is pressed.
+            # Yes: Close the window
+            self.mount_samba_server_def()
+        # No:  Do nothing.
 
 
     def setupMenus(self):
@@ -1822,12 +2059,15 @@ class MainWindow(QtGui.QMainWindow):
         aboutMenu = self.menuBar().addMenu("&Aide")
         aboutMenu.addAction(self.aboutAction)
         aboutMenu.addAction(self.aboutQtAction)
-        aboutMenu.addAction(self.info_dev)
+        # aboutMenu.addAction(self.info_dev)
 
 
     def long_print(self, nb_void = 5000):
         for i in range(nb_void):
             print ""
+
+    def clicked_ok_at_passw(self):
+        print "you clicked ok in the password"
 
     def dialog_enregistrement(self, 
             bool01 = True,

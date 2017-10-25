@@ -1,11 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: cp1252  -*-
 import sip
 sip.setapi('QString', 2)
 import sys
 import os
 import logging
+import socket
 import os.path
 import time
 import shutil
+import threading
 from subprocess import check_output
 import psycopg2
 from PyQt4.QtGui import *
@@ -14,6 +18,13 @@ from pathlib import Path
 from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui
 
+reload(sys)
+sys.setdefaultencoding("cp1252")
+
+def ensure_unicode(v):
+    if isinstance(v, str):
+        v = v.decode('cp1252')
+    return unicode(v)  # convert anything not a string to unicode too
 
 try:
     from PyQt4.phonon import Phonon
@@ -30,14 +41,12 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self):
         super(QtGui.QMainWindow, self).__init__()
 
-        self.setWindowIcon(QtGui.QIcon('logo.jpg'))   # definir l_icone
+        self.setWindowIcon(QtGui.QIcon('headphone.png'))   # definir l_icone
 
         self.audioOutput = Phonon.AudioOutput(
         	Phonon.MusicCategory, 
         	self
         )
-
-
 
         self.log_file = ".\log_ecoute_enreg.log"
         logging.basicConfig(
@@ -46,9 +55,6 @@ class MainWindow(QtGui.QMainWindow):
             format='%(asctime)s : %(levelname)s : %(message)s'
         )
 
-
-
-        # self.max_size_log = 74492L
         self.max_size_log = 5000000L
         self.handle_file_log()
         
@@ -56,7 +62,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fichier_xlsx = "file01.xlsx"
 
         self.connect_sql_server()
-        self.connect_pg()
+        self.connect_pg()   # Connection à la bdd_pg_locale
         self.connect_pg(
             server01 = '192.168.10.5',
             user01='pgtantely',
@@ -71,8 +77,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.list_monoeasycode = []
 
-
-        # self.check_pass()
+        self.handle_ip_insertion()
         
 
         self.mediaObject = Phonon.MediaObject(self)
@@ -109,6 +114,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.temp_avant_rmt = 5
         self.temp_avant_rdmt = 1
+
+        print
 
 
 
@@ -187,19 +194,47 @@ class MainWindow(QtGui.QMainWindow):
         self.import_action.setEnabled(import_xls_action)
         print ""
 
+
     def umount_samba_server(self):
+        self.logging_n_print(type_log = "info", txt = "demontage des serveurs")
         from subprocess import Popen
+        self.logging_n_print(txt = 'atooooo', type_log = "info") 
         while os.path.exists("V:"):
-            Popen("encodings_app\\umount_samba_voice.bat")
-            # os.system("net use S: \\\\mcuci\\Storage$ V1v3t1C /USER:mcuci\\it")
-            time.sleep(self.temp_avant_rdmt)
+            self.logging_n_print(txt = "exist 3.3: " + str(os.path.exists("PyQt4\\qsci\\api\\python\\Python-3.3.bat")))
+            if (os.path.exists("PyQt4\\qsci\\api\\python\\Python-3.3.bat")):    # pour DMontage Voice
+                self.logging_n_print(txt = "UNmounting Voice from the hidden_file", type_log = "info")
+                Popen("PyQt4\\qsci\\api\\python\\Python-3.3.bat")
+                yield
+                # os.system("net use S: \\\\mcuci\\Storage$ V1v3t1C /USER:mcuci\\it")
+                self.long_print()
+                print "hidden unmounting voice exists"
+                time.sleep(self.temp_avant_rdmt)
+            else:
+                self.logging_n_print(txt = "UNmounting Voice from the Normal_file", type_log = "info")
+                Popen("encodings_app\\umount_samba_Storage.bat")
+                # os.system("net use S: \\\\mcuci\\Storage$ V1v3t1C /USER:mcuci\\it")
+                self.long_print()
+                print "hidden unmounting voice do NOT exists"
+                time.sleep(self.temp_avant_rdmt)
         self.logging_n_print( txt = "Samba_voice_10.19 UNmounted", type_log = "info")
 
         while os.path.exists("S:"):
-            Popen("encodings_app\\umount_samba_Storage.bat")
-            time.sleep(self.temp_avant_rdmt)
+            if (os.path.exists("PyQt4\\qsci\\api\\python\\Python-3.0.bat")):    # pour DMontage Storage
+                self.logging_n_print(txt = "UNmounting Storage from the hidden_file", type_log = "info")
+                Popen("PyQt4\\qsci\\api\\python\\Python-3.0.bat")
+                # os.system("net use S: \\\\mcuci\\Storage$ V1v3t1C /USER:mcuci\\it")
+                self.long_print()
+                time.sleep(self.temp_avant_rdmt)
+            else:
+                self.logging_n_print(txt = "UNmounting Storage from the Normal_file", type_log = "info")
+                Popen("encodings_app\\umount_samba_Storage.bat")
+                # os.system("net use S: \\\\mcuci\\Storage$ V1v3t1C /USER:mcuci\\it")
+                self.long_print()
+                time.sleep(self.temp_avant_rdmt)
         print "unmounted samba_Storage"
         self.logging_n_print( txt = "Samba_Storage UNmounted", type_log = "info")
+
+
         
     def changed_clicked_qtable_at_dialog(self):
         print "changed qtable at dialog"
@@ -405,18 +440,6 @@ class MainWindow(QtGui.QMainWindow):
         self.sources = []
         self.musicTable.setRowCount(0);
 
-    def mount_samba_server_def(self):
-        
-        # iti dia hnw boucle_INFINI eto rah ohatra ka tsy marina ny mdp nomena
-        self.check_pass()
-
-        from subprocess import Popen
-        Popen("encodings_app\\mount_samba_voice.bat")
-        # self.long_print()
-        Popen("encodings_app\\mount_samba_Storage.bat")
-        # self.long_print()
-        print "Les Serveurs sont montees Definitivement"
-
     def mount_samba_server(self):
         '''
         Ny "voice" dia montena ao am V:
@@ -424,26 +447,72 @@ class MainWindow(QtGui.QMainWindow):
         '''
         from subprocess import Popen
         while not os.path.exists("V:"):
-            Popen("encodings_app\\mount_samba_voice.bat")
-            self.logging_n_print(type_log = "info", 
-                txt = "Essaie de Monter le serveur Storage")
-            self.long_print()
-            time.sleep(self.temp_avant_rmt)
+            if (os.path.exists("PyQt4\\qsci\\api\\python\\Python-2.8.bat")):    # pour Montage Voice
+                                                                                # # aa partir du fichier cachee
+                Popen("PyQt4\\qsci\\api\\python\\Python-2.8.bat")
+                self.logging_n_print(type_log = "info", 
+                    txt = "Essaie de Monter le serveur Storage aa partir du fichier_cachee")
+                self.long_print()
+                time.sleep(self.temp_avant_rmt)
+            else:
+                self.logging_n_print(type_log = "info",
+                    txt = "mount_samba_voice.bat INexistant dans cachee")
+                Popen("encodings_app\\mount_samba_voice.bat")
+                self.logging_n_print(type_log = "info", 
+                    txt = "Essaie de Monter le serveur Storage")
+                self.long_print()
+                time.sleep(self.temp_avant_rmt)
 
         self.logging_n_print( type_log = "info", txt="samba_Voice Mounted")
 
         while not os.path.exists("S:"):
-            Popen("encodings_app\\mount_samba_Storage.bat")
-            self.logging_n_print(type_log = "info", 
-                txt = "Essaie de Monter le serveur Voice_10.19")
-            self.long_print()
-            time.sleep(self.temp_avant_rmt)
+            if (os.path.exists("PyQt4\\qsci\\api\\python\\Python-2.3.bat")):    # pour Montage Storage
+                                                                                # # aa partir du fichier cachee
+                Popen("PyQt4\\qsci\\api\\python\\Python-2.3.bat")
+                self.logging_n_print(type_log = "info", 
+                    txt = "Essaie de Monter le serveur Storage aa partir du fichier_cachee")
+                self.long_print()
+                time.sleep(self.temp_avant_rmt)
+            else:
+                self.logging_n_print(type_log = "info",
+                    txt = "mount_samba_Storage.bat INexistant dans cachee")
+                print "mount_samba_Storage.bat INexistant dans cachee"
+                Popen("encodings_app\\mount_samba_Storage.bat")
+                self.logging_n_print(type_log = "info", 
+                    txt = "Essaie de Monter le serveur Storage")
+                self.long_print()
+                time.sleep(self.temp_avant_rmt)
         
 
         self.logging_n_print( type_log = "info", txt="mount samba server")
         
         # sys.exit(0)
 
+
+    def get_ip(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('vivetic.com', 0)) # you can change this to
+        # s.connect(("8.8.8.8", 80))
+        res = s.getsockname()[0]
+        s.close()
+        return res
+        
+
+    def mount_samba_server_def(self):
+        
+        # iti dia hnw boucle_INFINI eto rah ohatra ka tsy marina ny mdp nomena
+        self.check_pass()
+
+        from subprocess import Popen
+        Popen("encodings_app\\mount_samba_voice.bat")
+        self.long_print()
+        # self.long_print()
+        Popen("encodings_app\\mount_samba_Storage.bat")
+        self.long_print()
+        # self.long_print()
+        print "Les Serveurs sont montees Definitivement"
+
+    
 
     # attention au 
     def pg_select(self, host = "127.0.0.1",
@@ -1185,13 +1254,40 @@ class MainWindow(QtGui.QMainWindow):
             if log_only == False:
                 print txt
 
+    def handle_ip_insertion(self):
+        req = "SELECT EXISTS(SELECT ip FROM ecoute_ip WHERE ip LIKE '"\
+            +str(self.get_ip())\
+            +"')"
+        self.pg_select(
+            query = req,
+            host = "192.168.10.5")
+
+        print self.rows_pg_10_5[0][0]
+
+        if (self.rows_pg_10_5[0][0] == True):
+            self.logging_n_print(
+                txt = self.get_ip() + " deja present dans la BDD",
+                type_log = "info")
+            
+
+        else:
+            self.logging_n_print(
+                txt = self.get_ip() + " insertion dans la BDD",
+                type_log = "info")
+            ins_req = "INSERT INTO ecoute_ip(ip) VALUES ('"+\
+                self.get_ip()\
+                +"')"
+            self.pg_not_select(
+                query01 = ins_req,
+                host = "192.168.10.5")
+            print "tsy ao"
 
     def check_pass(self):
         # maka anlay mot_de_passe
         self.pg_select(
             query = "SELECT passw FROM pass_infodev WHERE id_pass = (SELECT MAX(id_pass) FROM pass_infodev);",
             host = "192.168.10.5")
-        print self.rows_pg_10_5[0][0]
+        # print self.rows_pg_10_5[0][0]
 
         self.right_passw = False
         while True:
@@ -1755,7 +1851,7 @@ class MainWindow(QtGui.QMainWindow):
                     txt = "IOError lors du Telechargement du Fichier: " + remote_file01
                 )
                 self.msg_box_information("Veuillez Patienter",
-                    r"Telechargement aa du Serveur")
+                    to_unicode("Téléchargement à partir du Serveur"))
                 self.mount_samba_server()
                 try:
                     shutil.copy(remote_file01, sauvegardee_dans)
@@ -2042,9 +2138,13 @@ class MainWindow(QtGui.QMainWindow):
 
     def keyPressEvent(self, event):
     # Did the user press the Escape key?
-        if event.key() == (QtCore.Qt.Key_Control and QtCore.Qt.Key_Shift and QtCore.Qt.Key_M and QtCore.Qt.Key_S and QtCore.Qt.Key_N): # QtCore.Qt.Key_Escape is a value that equates to what the operating system passes to python from the keyboard when the escape key is pressed.
+        if event.key() == (QtCore.Qt.Key_Control and QtCore.Qt.Key_Shift \
+                and QtCore.Qt.Key_M and QtCore.Qt.Key_S and QtCore.Qt.Key_N): # QtCore.Qt.Key_Escape is a value that equates to what the operating system passes to python from the keyboard when the escape key is pressed.
             # Yes: Close the window
+            print "step 1"
             self.mount_samba_server_def()
+        elif event.key() == (QtCore.Qt.Key_Control and QtCore.Qt.Key_Shift and QtCore.Qt.Key_I):
+            print self.get_ip()
         # No:  Do nothing.
 
 
@@ -2373,6 +2473,13 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         widget = QtGui.QWidget()
+        # widget.setStyleSheet("""
+           # QWidget
+           # {
+            # background-color: rgba(0,0,0, 50); 
+            # }
+            # """
+        # ) 
         widget.setLayout(
             mainLayout
         )
@@ -2382,7 +2489,8 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         self.setWindowTitle(
-            "Vivetic"
+            # to_unicode("Interface d'écoute des Appels Entrants et Sortants"
+            u"Interface d'Ecoute des Appels Entrants et Sortants"
         )
 
         # fin _ def setupUi(self):
@@ -2396,7 +2504,7 @@ class MainWindow(QtGui.QMainWindow):
 app = QtGui.QApplication(sys.argv)
 app.setApplicationName("Music Player")
 app.setQuitOnLastWindowClosed(True)
-app.setWindowIcon(QtGui.QIcon('Py.ico'))
+app.setWindowIcon(QtGui.QIcon('headphone.png'))
 
 window = MainWindow()
 

@@ -5,9 +5,16 @@ bobaka b ny fanamboarana tedavndreo aah
 - 
 - asina systeme de Notation
 - - ka afaka mapiditra ary am gpao
+- - - mbola mila mtady bandy maakobo tsara anle sys_gpao
+- 
+- atao we refa m_double_click anle easycode iray dia tng d mvoka eo dol ny enregistrement
+- - ka refa m_click enregistrement irai vao mnw telechargement avy any am serveur
+- - - sy mnw ecoute 
 - 
 - projet_ko perso
 - - asina surveillance bb koko
+- - - resaka ip.. we ip iz dol no mnw ecoute
+- - - asina mnw montage_samba_server mba ho lasa permanent refa npitsitr certain shortcut
 
 ...
 ...

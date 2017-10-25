@@ -1,0 +1,340 @@
+
+bobaka b ny fanamboarana tedavndreo aah
+- tsy excel tsoon no wasina ny easycode fa watao txt
+- asina box izai afaka anapdirana easycode ka amzai no akana ny enregistrement hoenoina
+- 
+- asina systeme de Notation
+- - ka afaka mapiditra ary am gpao
+- 
+- projet_ko perso
+- - asina surveillance bb koko
+
+...
+...
+...
+
+[done] _ mamboatra qhboxlayout01
+
+[done] _ mamboatra qtoolbar02 vao2
+[done] _ atao anati qtoolbar02 ilai button_import_action
+
+[done] _ atao anati qhboxlayout01 ni qtoolbar02
+
+[done] _ atao anaty mainLayout ilai qhboxlayout01
+
+
+
+apiana bouton_extraire_audio@music_table01
+vita ni bouton_extraire_audio.. fa mbola tsy affichee mihitsn.. 
+								tkn atao miarak am music_table01
+[done] - mamboatra bouton_extraire_audio
+[done] - - izai m_afficher "extraire_audio si on clique"
+[done] - - - mnw methode_extraire_audio
+[done] - - - apifandraisina ni bouton_extraire_audio si methode_extraire_audio
+- apdirina ani anaty music_table02 ni bouton_extraire_audio
+
+
+
+
+[done] - andramo ovaina ni mainlayout.. ataovi HBox
+
+
+[done] - mamboatra qvbox_layout_music_table01
+[done] - instanciation de qvbox_layout_music_table01
+[done] - atov ao ni musictable01 SY bouton_extraire_audio
+[done] - atov|soloy qvbox_layout_music_table01 ni self.musicTable ao am
+[done] - - mainLayout.addWidget(self.musicTable)
+
+
+smbget \\\\mcuci\\Storage$\\2017\\07\\12\\13\\15\\320003e0aa8c000001554596620e279f400153c520001000459.wav todel.wav
+
+
+bouton_extraire_audio
+music_table01
+-
+-
+apiana bouton_play_audio@music_table02
+[done] - mamboatra bouton_play_audio
+- - izai m_afficher "PLAY_audio si on clique"
+[done] - - - mnw meth_click_play_audio
+[done] - - - apifandraisina ni bouton_play_audio si methode_play_audio
+- apdirina ani anaty music_table02 ni bouton_play_audio
+
+
+mamboatra qvbox_layout_music_table02
+atao anaty qvbox_layout_music_table02 ni musicTable02 sy bouton_play_audio
+
+
+
+
+
+mianatra mi_afficher zvt ao am QTableWidget01
+
+asio zvt ao anaty musicTable01
+
+
+
+E:\DISK_D\mamitiana\zik\Nouveau dossier\Embona(Donnah).mp3
+
+
+
+
+[done] - mamaky excel
+[done] - manaova meth__lire_excel
+[done] - - asio anle "from mmap" sy "from xlrd"
+[done] - - asio simple.xls miaraka am project01.py
+
+
+
+[done] - manaova excel(name = file01.xls) izai misi:
+[done] - chp: 
+[done] - - calling_date
+[done] - - easy_code
+[done] - - campagne
+
+
+[done] - afficheo am musicTable01 ireo chp ireo
+
+
+[done] - for i = 0 -> nrows
+[done] - 	for j = 0 -> ncols
+[done] - 		print sheet01.row_values(i, j, j+1)
+
+
+
+
+apio combo_box__campagne, combo_box__call_date, combo_box__easycode am music_table01
+
+
+
+
+[done] - create combo_box__campagne,  
+[done] - - atov anaty qvbox_layout_music_table01 ny combo_box__campagne
+
+
+
+
+
+[done] - create combo_box__call_date,
+[done] - - atov anaty qvbox_layout_music_table01 ny combo_box__campagne
+
+[done] - create combo_box__easycode
+[done] - - atov anaty qvbox_layout_music_table01 ny combo_box__campagne
+
+
+
+
+
+[done] - au t = 0 			initial
+- camp = 1
+- call_date = 0
+- easycode = 0
+
+[done] - au t = 1 			changed campagne
+- camp = 0
+- call_date = 1
+- easycode = 0
+
+au t = 2 			changed call_date
+- camp = 0
+- call_date = 0
+- easycode = 1
+
+au t = 3 			changed easycode
+- camp = 0
+- call_date = 0
+- easycode = 0
+
+
+
+[done] - ajout du bouton_reinit_comboS
+[done] - ajouter suivant bouton_extraire_audio
+
+
+[done] - activena setupMenus
+- importer manao zvt hafa
+- - juste
+manao requete ani an
+
+
+import xlsx pour remplir les comboS
+- manao requete izai maka FTSN ni 
+- - list_campagne
+- - list_call_date
+- - list_easycode
+
+
+alaivo dol ni campagne 
+- manomboka am (ligne3 > nrows)
+- trievo ... izai mtov atambatra
+- ataovi unique
+
+
+[done] - apio bouton_test
+[done] - manaova bouton_test... mtov am bouton_reinit_comboS
+[done] - relieo bouton_test si meth__lire_xlsx_campagne
+[done] - apdiro anaty qvbox_layout_music_table02 ny bouton_test
+
+arakarak ni campagne no akana ni call_date
+- manao parcours ani am 
+
+[done] - faire joindre combo_box__campagne et lire_xlsx__get_call_date
+
+
+manao methode izai mretournee ireo call_date izai campagne == param_campagne
+
+
+[done] - esorina ilai manao connection an am sq_server
+
+amboari ilai maka anlai fichier izai ho vakiana
+- jereo we aiza no misi mamaki anlay fichier
+- ilai importer ka ni retourni 2KrY37
+
+\\mcuci\Storage$\2017\07\05\14\03\050003e0aa8c000001540595cf1976568001369720001000149.wav doesn't seem to be existant.
+
+req = 'select (time_stamp, 1, 4) + \ + substring(time_stamp, 5, 2) + \ ....convert(varchar(8), time_stamp) = ' + self.call_date + 'and ....' + 'easy.dbo.'+self.campagne+'inner join ... easy.dbo.' + self.campagne + '.easycode inner join ...  easy.dbo.'+self.campagne + '.easycode = '+self.matricule + ')'
+
+
+
+
+
+
+
+
+
+
+[done] - supprimer tout les traces de combo_box__easycode
+[done] - - supprimer son instanciation
+[done] - - supprimer relation avec methode__select_xxxx
+[done] - - supprimer methode__select_xxxx
+[done] - - supprimer son ajout dans layout
+
+
+[done] - ajout de qlist_easycode
+[done] - - instanciation
+[done] - - relation avec methode
+[done] - - ajout dans 
+
+
+
+manao anle we qtlist_easycode miova
+- jereo we aiza no mandeh refa miova ni combo_box__call_date
+
+
+
+
+
+[done] ampio qtable01
+[done] - instanciation
+[done] - ajout item01
+[done] - atov ao anaty qvbox_layout_music_table01
+-
+
+
+[done] manao meth__dialog01
+[done] - apfandraisina meth__dialog01 sy bouton_test
+[done] - asina m_affiche dialog01 ani am meth__dialog01
+
+
+
+
+
+CREATE SEQUENCE prj_ecoute01_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 5
+  CACHE 1;
+
+COMMENT ON SEQUENCE prj_ecoute01_seq IS 'Une ecoute va avoir une seule id_ecoute';
+
+ALTER TABLE prj_ecoute01_seq
+  OWNER TO postgres;
+GRANT ALL ON TABLE prj_ecoute01_seq TO pgtantely;
+GRANT SELECT, UPDATE ON TABLE prj_ecoute01_seq TO op;
+GRANT SELECT ON TABLE prj_ecoute01_seq TO prep;
+
+
+
+/**/
+drop table prj_ecoute01;
+
+CREATE TABLE prj_ecoute01
+(
+  id_ecoute integer NOT NULL DEFAULT nextval(('public.prj_ecoute01_seq'::text)::regclass),
+  chemin__a_partir_root character varying(254),
+
+  root_local character varying(128),
+  root_distant character varying(128),
+  telechargee smallint
+  easycode integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE alchimie_table
+  OWNER TO pgtantely;
+GRANT ALL ON TABLE alchimie_table TO pgtantely;
+GRANT SELECT ON TABLE alchimie_table TO prep;
+GRANT ALL ON TABLE alchimie_table TO op;
+
+
+
+
+// but
+create table prj_ecoute01(
+	id_ecoute integer primary key
+	chemin__a_partir_root character varying(254),
+	root_local character varying(254),
+	root_distant character varying(254),
+	telechargee smallint
+	fini smallint
+)
+
+
+
+
+
+
+on fait insertion ssi
+- chemin n_est pas encore dans table__prj_ecoute01
+-
+-
+-
+- on ajoute qlq_chz si "chemin" n_est pas dedans
+
+
+todo
+ani am import
+- mnw drop
+- mnw creation_table
+- mnw insertion ani anaty table: prj_ecoute01
+
+
+creation de la table_locale
+
+gestion de bouton_play
+
+creation de combo_campagne qui va contenir les campagnes disponibles
+
+création de list_easycode qui va contenir les easycodes qui sont rattachees aa la campagne selectionnee
+
+
+
+"2017\06\23\12\05\460003e0aa8c000001540594d04022591000f86e60001000003.wav"
+
+
+SELECT substring(time_stamp, 1, 4) + '\' + substring(time_stamp, 5, 2) + '\' + substring(time_stamp, 7, 2) + '\' + substring(time_stamp, 9, 2) + '\' + substring(time_stamp, 11, 2) + '\' + substring(time_stamp, 13, 5) + rec_key + rec_time +'.'+codec as chemin,  FROM AVR7.dbo.recording WHERE rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM easy.dbo.ct_NOMINATION_AS3 INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo.ct_NOMINATION_AS3.easycode INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code INNER JOIN easy.dbo.call_thread ON easy.dbo.thread.code = easy.dbo.call_thread.code WHERE easy.dbo.ct_NOMINATION_AS3.easycode = 17868039)
+
+
+[done] alohany anapdirana ni listt_dl_fini_XXX
+[done] - dia atov any anaty self.list__
+[done] - rhf m_click anlay item ao am dialog01 dia alaivo ni self.list__[2]
+
+
+
+
+apio bouton_reopen ao am self.dialog
+- instanciation
+- jointure methode to meth__reopen_dialog
+- 

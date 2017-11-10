@@ -832,7 +832,10 @@ class MainWindow(QtGui.QMainWindow):
             + ".easycode = "\
             +str(multieasy) +")"
 
-        # print req
+        print req
+# 
+        # sys.exit(0)
+
         # print ""
         # print ""
         # print ""
@@ -1147,7 +1150,7 @@ class MainWindow(QtGui.QMainWindow):
             # fin_else(else veut dire qu'on est AU dernier ligne du file.xlsx)
 
         # print "query_insert dans import_xls __code002__: " + query_insert
-
+        # sys.exit(0)
 
 
         # ty tsy olana fa ilai fanamboarana anlai requete no enjana

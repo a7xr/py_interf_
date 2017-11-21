@@ -1272,7 +1272,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pg_not_select(
                 query01 = ins_req,
                 host = "192.168.10.5")
-            print "tsy ao"
+            # print "tsy ao"
 
     def check_pass(self):
         # maka anlay mot_de_passe
@@ -1500,7 +1500,7 @@ class MainWindow(QtGui.QMainWindow):
             dldd = True,
             import_xls_action = True
         )
-        print "#####################################"
+        # print "#####################################"
         # print list_call_date01
         # list_call_date01 = list(set(list_call_date01))
         # list_call_date01 = sorted(list_call_date01)

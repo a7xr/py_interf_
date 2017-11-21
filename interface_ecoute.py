@@ -1106,62 +1106,7 @@ class MainWindow(QtGui.QMainWindow):
                 list_multieasycode.append(
                     multieasyc_i
                     )
-            # #manomboka_eto
-            # else: # on arrive ici lors du parcours du fichier_xls
-            # # # le fichier_xls parcourue est arrivee aa fin
-# 
-                # cpt_chm = 0
-                # for chemin in cheminS:
-                    # test_exist_fichier = self.root_distant + chemin
-# 
-                    # # on cherche dans voice
-                    # samba_ = "\\\\192.168.10.19\\voice\\"
-                    # file01 = Path(samba_ + chemin)
-                    # if (
-                            # # ao am Voice
-                            # file01.is_file()
-                        # ):
-                        # root_distant = "\\\\192.168.10.19\\voice\\"
-                        # # print root_distant + chemin
-                    # else:
-                        # samba_ = "\\\\mcuci\\Storage$\\"
-                        # file01 = Path(samba_ + chemin)
-                        # if (
-                            # # ao am Voice
-                            # file01.is_file()
-                        # ):
-                            # root_distant = "\\\\mcuci\\Storage$\\"
-                        # else:
-                            # msg_box_information("Fichier inexistant",
-                                # "Le fichier que vous cherchez n'existe pas")
-                    # if cpt_chm != (len(cheminS) - 1):
-                        # query_insert += "( '"
-                        # query_insert += chemin + "', '" \
-                        # + root_local + "', '"\
-                        # + root_distant + "', '"\
-                        # + telechargee + "', '"\
-                        # + fini + "', "\
-                        # + str(int(multieasyc_i)) + ", '" \
-                        # + str(self.table_campagne01)\
-                        # + "'), "
-                    # else:
-                        # query_insert += "( '"
-                        # query_insert += chemin + "', '" \
-                        # + root_local + "', '"\
-                        # + root_distant + "', '"\
-                        # + telechargee + "', '"\
-                        # + fini + "', "\
-                        # + str(int(multieasyc_i)) + ", '"\
-                        # + self.table_campagne01\
-                        # + "') "
-                    # cpt_chm = cpt_chm + 1
-# 
-# 
-                # list_multieasycode.append(
-                    # multieasyc_i
-                    # )
-
-            # #mfarana_eto
+            
             # fin_else(else veut dire qu'on est AU dernier ligne du file.xlsx)
 
         # print "query_insert dans import_xls __code002__: " + query_insert

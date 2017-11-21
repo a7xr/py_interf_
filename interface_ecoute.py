@@ -25,8 +25,10 @@ from pathlib import Path
 
 from ConfigParser import SafeConfigParser
 
+path_prg = 'E:\\DISK_D\\mamitiana\\kandra\\ecoute_enregistrement\\'
+
 parser = SafeConfigParser()
-parser.read('all_confs.ini')
+parser.read(path_prg + 'all_confs.ini')
 
 from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui

@@ -804,13 +804,13 @@ class MainWindow(QtGui.QMainWindow):
                 self, 
                 titre, 
                 txt
-                )
+        )
 
 
     def select_chemin(self,
             bool01 = True,
             table_campagne = "CT_NOMINATION_AS3",
-            multieasy = "17868031"):
+            easycode = "17868031"):
         req = "SELECT substring(time_stamp, 1, 4) "\
             +"+ '\\' + substring(time_stamp, 5, 2) "\
             +"+ '\\' + substring(time_stamp, 7, 2) "\
@@ -830,9 +830,9 @@ class MainWindow(QtGui.QMainWindow):
             +"WHERE easy.dbo."\
             +self.table_campagne01 \
             + ".easycode = "\
-            +str(multieasy) +")"
+            +str(easycode) +")"
 
-        print req
+        # print req
 # 
         # sys.exit(0)
 
@@ -846,19 +846,28 @@ class MainWindow(QtGui.QMainWindow):
                 .execute_query(req)
         except _mssql.MSSQLDatabaseException:
             self.msg_box_information(
-                 "Relation fichier Excel et la Campagne choisie",
-                "La Campagne que vous avez choisie n'est PAS Compatible au fichier Excel" \
-                + "\n- Erreur dans SQL_Serveur"
+                "Relation fichier Excel et la Campagne choisie",
+                "Erreur _mssql: " + req
                 )
+            return
 
         #dans select_chemin
 
-        plusieurs_monoeasy = []
+        chemin_enregistrements = []
+
+        if len(chemin_enregistrements) == 0:
+            self.logging_n_print(
+                type_log = "warning",
+                txt = "Incoherence de donnees: table(" + self.table_campagne01 + ") - easycode(" + easycode + ")"
+            )
+            return
+
         for row in self.conn_sql_server:
-            plusieurs_monoeasy.\
+            chemin_enregistrements.\
                 append(row['chemin'])
 
-        return plusieurs_monoeasy
+
+        return chemin_enregistrements
         #fin select_chemin
 
 
@@ -1040,7 +1049,7 @@ class MainWindow(QtGui.QMainWindow):
             # ti maka anlai chemin sans tenir compte du root_distant
             cheminS = self.select_chemin(
                 table_campagne = self.combo_box__campagne.currentText(),
-                multieasy = str(multieasyc_i)[:-2]
+                easycode = str(multieasyc_i)[:-2]
                 # ilia ce -2 car multieasyc_i=17868031.0
             )
             
@@ -1051,7 +1060,10 @@ class MainWindow(QtGui.QMainWindow):
             # sarotsarotra azavaina ti aah!
             # hafa ni requete rah ohatra ka ani am farani n easycode ani am 
             # # fichier.xlsx no jerena ni enregistrement
-            if ((i != (sheet0.nrows - 1)) or (i == (sheet0.nrows - 1))):
+            if (
+                (i != (sheet0.nrows - 1)) or 
+                (i == (sheet0.nrows - 1)) # tam voloo nisy anle manala anle virgule keli ini
+            ):
                 cpt_chm = 0
 
                 # isakn easycode ao am fichier_xls... alaina ireo fichier_enregistrements mfandrai amn
@@ -1105,7 +1117,7 @@ class MainWindow(QtGui.QMainWindow):
 
                 list_multieasycode.append(
                     multieasyc_i
-                    )
+                )
             
             # fin_else(else veut dire qu'on est AU dernier ligne du file.xlsx)
 
@@ -1113,14 +1125,20 @@ class MainWindow(QtGui.QMainWindow):
         query_insert = query_insert[:-2]
         # print query_insert
         # # INSERT INTO prj_ecoute01 (chemin__a_partir_root, root_local, root_distant, telechargee, fini, multi_easycode, table_campagne) VALUES ( '2017\11\08\15\02\500003e0aa8c000000a805a031c9006790010f3360001000101.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240025, 'ct_NIP_2018'), ( '2017\11\08\15\02\580003e0aa8c000000a805a031c9f067c0010f33c0001000018.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240026, 'ct_NIP_2018'), ( '2017\11\08\15\03\270003e0aa8c000000a805a031cbc06830010f34b0001000115.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240026, 'ct_NIP_2018')
-        # sys.exit(0)
-
-
+        
         # ty tsy olana fa ilai fanamboarana anlai requete no enjana
         try:
             self.cursor_pg_local.execute(query_insert)
         except psycopg2.ProgrammingError:
             self.umount_samba_server()
+            self.logging_n_print(
+                txt = query_insert,
+                type_log = "warning",
+            )
+            self.logging_n_print(
+                txt = str(cheminS),
+                type_log = "warning",
+            )
             self.msg_box_information(
                 "Relation fichier Excel et la Campagne choisie",
                 "La Campagne que vous avez choisie n'est PAS Compatible au fichier Excel" \
@@ -1131,9 +1149,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # eto ni mnw insertion
         self.connect_pg_local_saisie.commit()
-
-        # self.conn_sql_server \
-            # .execute_query(query_insert)
 
         #dans import_xls
         # on elimine les doublons
@@ -1166,20 +1181,20 @@ class MainWindow(QtGui.QMainWindow):
     # atov ani anaty fichier_conf
     # # ti mbola ketrika hafa mitsn
     def handle_file_log(self):
-        
         if (os.path.exists(self.log_file)):
             statinfo = os.stat(self.log_file)
             if statinfo.st_size > self.max_size_log:
                 os.remove(self.log_file)
                 open(self.log_file, 'a').close()
 
-        print ""
+        # print ""
 
     def logging_n_print(self, 
             bool01 = True,
             type_log = "info", # OU warning OU debug
             txt = "text",
-            log_only = True):
+            log_only = True
+    ):
 
         if(type_log == "warning"):
             logging.warning(txt)

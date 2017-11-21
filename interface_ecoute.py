@@ -190,12 +190,13 @@ class MainWindow(QtGui.QMainWindow):
             query = "select campagne, table_campagne from ecoute_enreg",
             host = "192.168.10.5")
 
+        # ceci est un dico
         self.campagne__table_campagne = {}
         for row in self.rows_pg_10_5:
             self.campagne__table_campagne[row[0]] = row[1]
 
         # print self.campagne__table_campagne
-
+        # # encore une fois self.campagne__table_campagne est un dico
         return sorted(list(self.campagne__table_campagne.keys()))
 
 
@@ -861,6 +862,8 @@ class MainWindow(QtGui.QMainWindow):
         #fin select_chemin
 
 
+    # ceci est faite apres choix de campagne dans le combo_box
+    # # on arrive ici quand self.table_campagne01 est remplit
     def import_xls(self,
             bool01 = True,
             #root_local = "E:\\DISK_D\\ecoutes\\", 
@@ -870,7 +873,7 @@ class MainWindow(QtGui.QMainWindow):
             fini = "0",
             monoeasy = "17868031"
         ):
-
+        # creation du repertoire qui va contenir les enregistrements
         if not os.path.exists(root_local):
             os.makedirs(root_local)
 
@@ -881,20 +884,32 @@ class MainWindow(QtGui.QMainWindow):
         """
         
         # ndr1ndr1 refa atao indrepani ftsn ti d 
+        # on efface le contenu du self.qtlist_multieasycode
         self.remove_all_qtlist_multieasycode()
         self.remove_all_qtlist_multieasycode()
-        files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Excel APPROPRIEE",
-                QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))
+        
+        # on parcours vers le fichier_xls qui contient les easycodes 
+        # # correspondants au campagne choisie
+        files = QtGui.QFileDialog.getOpenFileNames(
+            self, 
+            "Veuillez choisir un Fichier Excel APPROPRIEE",
+            QtGui.QDesktopServices.storageLocation(
+                QtGui.QDesktopServices.MusicLocation
+            )
+        )
         if not files:
             return
 
-        index = len(self.sources)
+        # index = len(self.sources)
 
+        # si on a selectionnee plusieurs fichiers lors du selection du fichier_xls
+        # # qui doit correspondre au campagne choisie alors on affiche une erreur
         if len (files) != 1:
             # print "Vous avez choisit plusieurs fichiers... Veuillez choisir qu'une seule"
             self.logging_n_print(
                 type_log = "warning",
-                txt = "Vous avez choisit plusieurs fichiers... Veuillez choisir qu'une seule")
+                txt = "Vous avez choisit plusieurs fichiers... Veuillez choisir qu'une seule"
+            )
 
             self.logging_n_print(txt = ' _ '.join(files))
 
@@ -904,7 +919,6 @@ class MainWindow(QtGui.QMainWindow):
                 "Erreur d'Import de fichier\n"
                 "- Veuillez choisir qu'une seule fichier"
                 )
-            # raw_input("")
             # on a importer un fichier NON_xlsx
             return
 
@@ -917,15 +931,29 @@ class MainWindow(QtGui.QMainWindow):
 
 
         tmp = files[0]
+
+        # on teste si le fichier est un fichier.xlsx
+        # # si oui on continue
+        # # # et on monte les samba_serveur
+        # # si non on stop
         if tmp[-5:] == ".xlsx":
             self.fichier_xlsx = tmp
-            print "fichier_xlsx: " + self.fichier_xlsx
-            self.logging_n_print(txt = "Fichier Excel Importee: " + self.fichier_xlsx)
+            # print "fichier_xlsx: " + self.fichier_xlsx
+            self.logging_n_print(
+                txt = "Fichier Excel Importee: " + self.fichier_xlsx
+            )
+            # on monte les samba_serveurs
+            # # on demonte les serveurs grace aa self.umount_samba_server
+            # # qui se trouve en bas
+            ###essaie de supprimer ceci##########################
             self.mount_samba_server()
+            ###essaie de supprimer la ligne du dessus############
+
         else:
             self.msg_box_information(
                 "ERREUR de Fichier",
                 "Votre fichier n'est pas un fichier excel CONVENABLE")
+            return
 
         self.etat_elemS(
             campg = True,
@@ -939,11 +967,8 @@ class MainWindow(QtGui.QMainWindow):
             self.fichier_xlsx   
         )
 
-
-        
-
-
-        # mnw anle drop_table
+        # recreer prj_ecoute01@local
+        # recreer prj_ecoute01_seq@local
         drop_query = "DROP TABLE IF EXISTS prj_ecoute01;"
         self.pg_not_select(query01 = drop_query)
         # print "table: prj_ecoute01 est EFFACEE"
@@ -982,18 +1007,15 @@ class MainWindow(QtGui.QMainWindow):
 
 
         self.pg_not_select(create_query)
-        # print "table: prj_ecoute01 est CREEE"
 
         self.pg_not_select(create_seq)
 
-        # mnw test we aiz no misi anlai fichier
+        # fin recreer prj_ecoute01@local
+        # fin recreer prj_ecoute01_seq@local
 
 
-
-        # manomboka eto dia : Formation de la requete_insert
-
-
-
+        #################################################################################
+        # manomboka eto dia : Formation de la requete_insert                            #
         query_insert = "INSERT INTO " \
             + "prj_ecoute01 "\
             +"(chemin__a_partir_root, "\
@@ -1001,9 +1023,8 @@ class MainWindow(QtGui.QMainWindow):
             +"telechargee, fini, "\
             +"multi_easycode, table_campagne) " +\
             "VALUES " 
-            
 
-        #dans import_xls
+        # dans import_xls
         sheet0 = book.sheet_by_index(0)
         list_multieasycode = []
 
@@ -1013,12 +1034,15 @@ class MainWindow(QtGui.QMainWindow):
             # multieasyc_i dia meti manana enregistrement maro2
             multieasyc_i = sheet0.row_values(i, 0, 1)[0]
 
+            # print multieasyc_i
+            # # 17868031.0
             # sys.exit(0)
             # ti maka anlai chemin sans tenir compte du root_distant
             cheminS = self.select_chemin(
                 table_campagne = self.combo_box__campagne.currentText(),
                 multieasy = str(multieasyc_i)[:-2]
-            );
+                # ilia ce -2 car multieasyc_i=17868031.0
+            )
             
             # multieasyc_i dia meti manana enregistrement maro2
             # # ireto manaraka ireto ni chemin maka ani am enregistrement an_i easycode irai
@@ -1027,8 +1051,11 @@ class MainWindow(QtGui.QMainWindow):
             # sarotsarotra azavaina ti aah!
             # hafa ni requete rah ohatra ka ani am farani n easycode ani am 
             # # fichier.xlsx no jerena ni enregistrement
-            if i != (sheet0.nrows-1):
+            if i != (sheet0.nrows - 1):
                 cpt_chm = 0
+
+                # isakn easycode ao am fichier_xls... alaina ireo fichier_enregistrements mfandrai amn
+                # 
                 for chemin in cheminS:
                     test_exist_fichier = self.root_distant + chemin
 
@@ -1053,8 +1080,6 @@ class MainWindow(QtGui.QMainWindow):
                             msg_box_information("Fichier inexistant",
                                 "Le fichier que vous cherchez n'existe pas")
 
-
-                    # sys.exit(0)
                     if cpt_chm != (len(cheminS) - 1):
                         query_insert += "( '"
                         query_insert += chemin + "', '" \
@@ -1077,18 +1102,13 @@ class MainWindow(QtGui.QMainWindow):
                         + "'), "
                     cpt_chm = cpt_chm + 1
 
-                # print ""
-                # print ""
-                # print ""
-                # print ""
-                # print ""
-                # print "query_insert dans import_xls __code__0001: " + query_insert
-
 
                 list_multieasycode.append(
                     multieasyc_i
                     )
-            else:
+            else: # on arrive ici lors du parcours du fichier_xls
+            # # le fichier_xls parcourue est arrivee aa fin
+
                 cpt_chm = 0
                 for chemin in cheminS:
                     test_exist_fichier = self.root_distant + chemin
@@ -1135,13 +1155,6 @@ class MainWindow(QtGui.QMainWindow):
                         + "') "
                     cpt_chm = cpt_chm + 1
 
-                # print ""
-                # print ""
-                # print ""
-                # print ""
-                # print ""
-                # print "query_insert dans import_xls __code__0001: " + query_insert
-
 
                 list_multieasycode.append(
                     multieasyc_i
@@ -1162,7 +1175,8 @@ class MainWindow(QtGui.QMainWindow):
                 "La Campagne que vous avez choisie n'est PAS Compatible au fichier Excel" \
                 + "\n- Erreur dans Psycopg"
             )
-            sys.exit(0)
+            # sys.exit(0)
+            return
 
         # eto ni mnw insertion
         self.connect_pg_local_saisie.commit()
@@ -1181,15 +1195,6 @@ class MainWindow(QtGui.QMainWindow):
         # on fait un tri
         list_multieasycode = sorted(list_multieasycode)
 
-
-
-        # print ""
-        # print ""
-        # print ""
-        # print ""
-        # print ""
-        # print list_multieasycode
-        
         # elem sera un mono_easycode
         for elem in list_multieasycode:
             if (str(elem)[-2:] == ".0"):
@@ -1474,17 +1479,9 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-
+    # va s_exe apres choix d_un campagne
     def selection_change_combo_campagne(self):  
-        # print "changed combo box of campagne"
         
-
-        # print self.combo_box__campagne.currentText()
-
-        # list_call_date01 = \
-            # self.lire_xlsx__get_call_date(
-                # campgn = self.combo_box__campagne.currentText())
-
         self.etat_elemS(
             campg = True,
             multieasyc = True,
@@ -1492,7 +1489,7 @@ class MainWindow(QtGui.QMainWindow):
             dldd = True
         )
 
-        print self.combo_box__campagne.currentText()
+        # print self.combo_box__campagne.currentText()
         self.etat_elemS(
             campg = True,
             multieasyc = True,
@@ -1507,23 +1504,13 @@ class MainWindow(QtGui.QMainWindow):
         tmp_txt = "Choix Campagne: " + self.combo_box__campagne.currentText()
         self.logging_n_print(txt = tmp_txt)
 
+        # self.campagne__table_campagne est un dico
+        # XX.get() prend un clee et la valeur correspondante
         self.table_campagne01 = str(self.campagne__table_campagne.get(
                 self.combo_box__campagne.currentText()
-            ))
-        # print self.table_campagne01
-
-        # print list_call_date01
-        # for a in list_call_date01 :
-            # if (str(a)[-2:] == ".0"):
-                # self.qtlist_multieasycode.\
-                    # addItem(str(a)[:-2])
-            # else:
-                # self.qtlist_multieasycode.\
-                    # addItem(str(a))
-
-
-
-
+            )
+        )
+        
     def addFiles01(self):
         files = QtGui.QFileDialog.getOpenFileNames(self, "Veuillez choisir un Fichier Audio",
                 QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.MusicLocation))

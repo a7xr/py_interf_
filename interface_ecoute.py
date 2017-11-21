@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: cp1252  -*-
 
-# NOMINATION NIP
-# http://192.168.10.13/test/version2/saisie/
-# http://192.168.10.13/test/version2/annuaire/
-# E:\DISK_D\mamitiana\kandra\ecoute_enregistrement\file05.xlsx
-
 
 import sip
 sip.setapi('QString', 2)
@@ -27,8 +22,10 @@ from ConfigParser import SafeConfigParser
 
 path_prg = 'E:\\DISK_D\\mamitiana\\kandra\\ecoute_enregistrement\\'
 
+path_folder_conf = 'E:\\DISK_D\\mamitiana\\kandra\\do_not_erase\\our_tools\\'
+
 parser = SafeConfigParser()
-parser.read(path_prg + 'all_confs.ini')
+parser.read(path_folder_conf + 'all_confs.ini')
 
 from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui

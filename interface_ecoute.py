@@ -1051,7 +1051,7 @@ class MainWindow(QtGui.QMainWindow):
             # sarotsarotra azavaina ti aah!
             # hafa ni requete rah ohatra ka ani am farani n easycode ani am 
             # # fichier.xlsx no jerena ni enregistrement
-            if i != (sheet0.nrows - 1):
+            if ((i != (sheet0.nrows - 1)) or (i == (sheet0.nrows - 1))):
                 cpt_chm = 0
 
                 # isakn easycode ao am fichier_xls... alaina ireo fichier_enregistrements mfandrai amn
@@ -1106,62 +1106,68 @@ class MainWindow(QtGui.QMainWindow):
                 list_multieasycode.append(
                     multieasyc_i
                     )
-            else: # on arrive ici lors du parcours du fichier_xls
-            # # le fichier_xls parcourue est arrivee aa fin
+            # #manomboka_eto
+            # else: # on arrive ici lors du parcours du fichier_xls
+            # # # le fichier_xls parcourue est arrivee aa fin
+# 
+                # cpt_chm = 0
+                # for chemin in cheminS:
+                    # test_exist_fichier = self.root_distant + chemin
+# 
+                    # # on cherche dans voice
+                    # samba_ = "\\\\192.168.10.19\\voice\\"
+                    # file01 = Path(samba_ + chemin)
+                    # if (
+                            # # ao am Voice
+                            # file01.is_file()
+                        # ):
+                        # root_distant = "\\\\192.168.10.19\\voice\\"
+                        # # print root_distant + chemin
+                    # else:
+                        # samba_ = "\\\\mcuci\\Storage$\\"
+                        # file01 = Path(samba_ + chemin)
+                        # if (
+                            # # ao am Voice
+                            # file01.is_file()
+                        # ):
+                            # root_distant = "\\\\mcuci\\Storage$\\"
+                        # else:
+                            # msg_box_information("Fichier inexistant",
+                                # "Le fichier que vous cherchez n'existe pas")
+                    # if cpt_chm != (len(cheminS) - 1):
+                        # query_insert += "( '"
+                        # query_insert += chemin + "', '" \
+                        # + root_local + "', '"\
+                        # + root_distant + "', '"\
+                        # + telechargee + "', '"\
+                        # + fini + "', "\
+                        # + str(int(multieasyc_i)) + ", '" \
+                        # + str(self.table_campagne01)\
+                        # + "'), "
+                    # else:
+                        # query_insert += "( '"
+                        # query_insert += chemin + "', '" \
+                        # + root_local + "', '"\
+                        # + root_distant + "', '"\
+                        # + telechargee + "', '"\
+                        # + fini + "', "\
+                        # + str(int(multieasyc_i)) + ", '"\
+                        # + self.table_campagne01\
+                        # + "') "
+                    # cpt_chm = cpt_chm + 1
+# 
+# 
+                # list_multieasycode.append(
+                    # multieasyc_i
+                    # )
 
-                cpt_chm = 0
-                for chemin in cheminS:
-                    test_exist_fichier = self.root_distant + chemin
-
-                    # on cherche dans voice
-                    samba_ = "\\\\192.168.10.19\\voice\\"
-                    file01 = Path(samba_ + chemin)
-                    if (
-                            # ao am Voice
-                            file01.is_file()
-                        ):
-                        root_distant = "\\\\192.168.10.19\\voice\\"
-                        # print root_distant + chemin
-                    else:
-                        samba_ = "\\\\mcuci\\Storage$\\"
-                        file01 = Path(samba_ + chemin)
-                        if (
-                            # ao am Voice
-                            file01.is_file()
-                        ):
-                            root_distant = "\\\\mcuci\\Storage$\\"
-                        else:
-                            msg_box_information("Fichier inexistant",
-                                "Le fichier que vous cherchez n'existe pas")
-                    if cpt_chm != (len(cheminS) - 1):
-                        query_insert += "( '"
-                        query_insert += chemin + "', '" \
-                        + root_local + "', '"\
-                        + root_distant + "', '"\
-                        + telechargee + "', '"\
-                        + fini + "', "\
-                        + str(int(multieasyc_i)) + ", '" \
-                        + str(self.table_campagne01)\
-                        + "'), "
-                    else:
-                        query_insert += "( '"
-                        query_insert += chemin + "', '" \
-                        + root_local + "', '"\
-                        + root_distant + "', '"\
-                        + telechargee + "', '"\
-                        + fini + "', "\
-                        + str(int(multieasyc_i)) + ", '"\
-                        + self.table_campagne01\
-                        + "') "
-                    cpt_chm = cpt_chm + 1
-
-
-                list_multieasycode.append(
-                    multieasyc_i
-                    )
+            # #mfarana_eto
             # fin_else(else veut dire qu'on est AU dernier ligne du file.xlsx)
 
         # print "query_insert dans import_xls __code002__: " + query_insert
+        query_insert = query_insert[:-2]
+        # print query_insert
+        # # INSERT INTO prj_ecoute01 (chemin__a_partir_root, root_local, root_distant, telechargee, fini, multi_easycode, table_campagne) VALUES ( '2017\11\08\15\02\500003e0aa8c000000a805a031c9006790010f3360001000101.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240025, 'ct_NIP_2018'), ( '2017\11\08\15\02\580003e0aa8c000000a805a031c9f067c0010f33c0001000018.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240026, 'ct_NIP_2018'), ( '2017\11\08\15\03\270003e0aa8c000000a805a031cbc06830010f34b0001000115.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240026, 'ct_NIP_2018')
         # sys.exit(0)
 
 

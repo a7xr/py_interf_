@@ -708,7 +708,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def sizeHint(self):
-        return QtCore.QSize(1000, 500)
+        return QtCore.QSize(1000, 750)
 
 
 
@@ -1966,20 +1966,20 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-        self.bouton_reinit_elemS = QtGui.QPushButton(
-            "Reinitialiser"
-        )
+        # self.bouton_reinit_elemS = QtGui.QPushButton(
+            # "Reinitialiser"
+        # )
 
         self.bouton_test = QtGui.QPushButton(
             "Monter les Serveurs"
         )
 
-        self.bouton_reinit_elemS.clicked.connect(
-            self.remove_all_qtlist_multieasycode
-            # (
-                # text01 = "akondro"
-            # )
-        )
+        # self.bouton_reinit_elemS.clicked.connect(
+            # self.remove_all_qtlist_multieasycode
+            # # (
+                # # text01 = "akondro"
+            # # )
+        # )
 
 
         self.bouton_test.clicked.connect(
@@ -2378,7 +2378,66 @@ class MainWindow(QtGui.QMainWindow):
 
         # dans _ def setupUi(self):
 
+        self.tabwidget = QtGui.QTabWidget()
 
+
+        self.tab_excel_down = QtGui.QWidget()
+        self.tab_saisie_down = QtGui.QWidget()
+
+
+        self.combo_box__campagne = QtGui.QComboBox(self.tab_excel_down)
+        self.combo_box__campagne.setGeometry(QtCore.QRect(50, 50, 150, 23))
+        self.combo_box__campagne.setStyleSheet('''
+                    QComboBox { max-width: 1000px; min-height: 20px;}
+                    '''
+        )
+        self.combo_box__campagne.addItems(
+                    # ["campagne01", "campagne02", "campagne03"]
+                    self.select_list_campagne()
+                )
+        self.combo_box__campagne.\
+                    currentIndexChanged.\
+                    connect(
+                        self.selection_change_combo_campagne
+        )
+        self.combo_box__campagne.setEnabled(True)
+        
+        self.bouton_reinit_elemS = QtGui.QPushButton(
+            self.tab_excel_down
+        )
+        self.bouton_reinit_elemS.setText("Reinitialiser")
+        self.bouton_reinit_elemS.setGeometry(QtCore.QRect(600, 50, 100, 23))
+        self.bouton_reinit_elemS.clicked.connect(
+            self.remove_all_qtlist_multieasycode
+            # (
+                # text01 = "akondro"
+            # )
+        )
+
+
+        self.button_test = QtGui.QPushButton(self.tab_excel_down)
+        self.button_test.setText('Importer Excel')
+        self.button_test.clicked.connect(
+            self.import_xls
+        )
+        self.button_test.setGeometry(QtCore.QRect(220, 50, 100, 23))
+
+        self.qtlist_multieasycode = QtGui.QListWidget(self.tab_excel_down)
+        self.qtlist_multieasycode.setGeometry(QtCore.QRect(350, 20, 200, 23))
+        self.qtlist_multieasycode.setStyleSheet('''
+            QListWidget { max-width: 150px; min-height: 200px;}
+            '''
+            )
+        self.qtlist_multieasycode.addItem("")
+        self.qtlist_multieasycode.\
+            itemDoubleClicked.\
+            connect(self.double_clicked_multieasycode)
+        
+        vlayout = QtGui.QVBoxLayout()
+        self.tabwidget.addTab(self.tab_saisie_down, 'Saisie')
+        self.tabwidget.addTab(self.tab_excel_down, 'Excel')
+
+        vlayout.addWidget(self.tabwidget)
 
         # mnw anle layout
 
@@ -2388,10 +2447,10 @@ class MainWindow(QtGui.QMainWindow):
         layout_for_tab = QtGui.QVBoxLayout()
 
 
-        qvbox_layout_music_table01.addWidget(self.combo_box__campagne)
-        qvbox_layout_music_table01.addWidget(self.qtlist_multieasycode)
+        # qvbox_layout_music_table01.addWidget(self.combo_box__campagne)
+        # qvbox_layout_music_table01.addWidget(self.qtlist_multieasycode)
         # qvbox_layout_music_table01.addWidget(self.qtlist_monoeasycode)
-        qvbox_layout_music_table01.addWidget(self.bouton_reinit_elemS)
+        # qvbox_layout_music_table01.addWidget(self.bouton_reinit_elemS)
 
         mainLayout.addWidget(
             self.musicTable
@@ -2411,6 +2470,10 @@ class MainWindow(QtGui.QMainWindow):
 
         mainLayout.addLayout(
             qvbox_layout_music_table01
+        )
+
+        mainLayout.addLayout(
+            vlayout
         )
 
               

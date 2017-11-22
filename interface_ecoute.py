@@ -810,7 +810,9 @@ class MainWindow(QtGui.QMainWindow):
     def select_chemin(self,
             bool01 = True,
             table_campagne = "CT_NOMINATION_AS3",
-            easycode = "17868031"):
+            easycode = "17868031"
+    ):
+        print "dans select_chemin"
         req = "SELECT substring(time_stamp, 1, 4) "\
             +"+ '\\' + substring(time_stamp, 5, 2) "\
             +"+ '\\' + substring(time_stamp, 7, 2) "\
@@ -862,6 +864,8 @@ class MainWindow(QtGui.QMainWindow):
             )
             return
 
+        print self.conn_sql_server
+        sys.exit(0)
         for row in self.conn_sql_server:
             chemin_enregistrements.\
                 append(row['chemin'])
@@ -1052,6 +1056,8 @@ class MainWindow(QtGui.QMainWindow):
                 easycode = str(multieasyc_i)[:-2]
                 # ilia ce -2 car multieasyc_i=17868031.0
             )
+            # print cheminS
+            # sys.exit(0)
             
             # multieasyc_i dia meti manana enregistrement maro2
             # # ireto manaraka ireto ni chemin maka ani am enregistrement an_i easycode irai
@@ -2272,47 +2278,35 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-        self.combo_box__campagne = QtGui.QComboBox()
-
+        
         self.qtlist_dldd = QtGui.QListWidget()
         
 
-        self.qtlist_multieasycode = QtGui.QListWidget()
-        self.qtlist_multieasycode.setStyleSheet('''
-            QListWidget { max-width: 150px; min-height: 200px;}
-            '''
-            )
-        self.qtlist_multieasycode.addItem("")
+        # self.qtlist_multieasycode = QtGui.QListWidget()
+        # self.qtlist_multieasycode.setStyleSheet('''
+            # QListWidget { max-width: 150px; min-height: 200px;}
+            # '''
+            # )
+        # self.qtlist_multieasycode.addItem("")
 
-        self.qtlist_monoeasycode = QtGui.QListWidget()
         
 
-        self.combo_box__campagne.setStyleSheet('''
-            QComboBox { max-width: 1000px; min-height: 20px;}
-            '''
-            )
+        
 
 
 
-        self.combo_box__campagne.addItems(
-            # ["campagne01", "campagne02", "campagne03"]
-            self.select_list_campagne()
-        )
+        
 
         #~ ##liaison des elem_graphique avec meth01
-        self.combo_box__campagne.\
-            currentIndexChanged.\
-            connect(
-                self.selection_change_combo_campagne
-            )
+        
 
 
 
 
         
-        self.qtlist_multieasycode.\
-            itemDoubleClicked.\
-            connect(self.double_clicked_multieasycode)
+        # self.qtlist_multieasycode.\
+            # itemDoubleClicked.\
+            # connect(self.double_clicked_multieasycode)
 
         
 
@@ -2324,7 +2318,6 @@ class MainWindow(QtGui.QMainWindow):
         # etat des self.(
         #    combo_box__campagne)
         # # au temps = 0
-        self.combo_box__campagne.setEnabled(True)
         
 
         self.musicTable.setHorizontalHeaderLabels(headers)
@@ -2372,12 +2365,45 @@ class MainWindow(QtGui.QMainWindow):
 
 
         self.tabwidget = QtGui.QTabWidget()
-        
+
+
         self.tab_excel_down = QtGui.QWidget()
         self.tab_saisie_down = QtGui.QWidget()
 
+
+        self.combo_box__campagne = QtGui.QComboBox(self.tab_excel_down)
+
+        self.combo_box__campagne.setStyleSheet('''
+                    QComboBox { max-width: 1000px; min-height: 20px;}
+                    '''
+        )
+        self.combo_box__campagne.addItems(
+                    # ["campagne01", "campagne02", "campagne03"]
+                    self.select_list_campagne()
+                )
+        self.combo_box__campagne.\
+                    currentIndexChanged.\
+                    connect(
+                        self.selection_change_combo_campagne
+        )
+        self.combo_box__campagne.setEnabled(True)
+        
+        
+
         self.button_test = QtGui.QPushButton(self.tab_excel_down)
-        self.button_test.setGeometry(QtCore.QRect(100, 40, 75, 23))
+        self.button_test.setText('Importer Excel')
+        self.button_test.setGeometry(QtCore.QRect(0, 90, 100, 23))
+
+        self.qtlist_multieasycode = QtGui.QListWidget(self.tab_excel_down)
+        self.qtlist_multieasycode.setGeometry(QtCore.QRect(0, 90, 100, 23))
+        self.qtlist_multieasycode.setStyleSheet('''
+            QListWidget { max-width: 150px; min-height: 100px;}
+            '''
+            )
+        self.qtlist_multieasycode.addItem("")
+        self.qtlist_multieasycode.\
+            itemDoubleClicked.\
+            connect(self.double_clicked_multieasycode)
         
         vlayout = QtGui.QVBoxLayout()
         self.tabwidget.addTab(self.tab_saisie_down, 'Saisie')
@@ -2395,8 +2421,8 @@ class MainWindow(QtGui.QMainWindow):
         
 
 
-        qvbox_layout_music_table01.addWidget(self.combo_box__campagne)
-        qvbox_layout_music_table01.addWidget(self.qtlist_multieasycode)
+        # qvbox_layout_music_table01.addWidget(self.combo_box__campagne)
+        # qvbox_layout_music_table01.addWidget(self.qtlist_multieasycode)
         # qvbox_layout_music_table01.addWidget(self.qtlist_monoeasycode)
         qvbox_layout_music_table01.addWidget(self.bouton_reinit_elemS)
 

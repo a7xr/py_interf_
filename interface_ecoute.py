@@ -852,7 +852,7 @@ class MainWindow(QtGui.QMainWindow):
                 )
 
         #dans select_chemin
-
+        
         plusieurs_monoeasy = []
         for row in self.conn_sql_server:
             plusieurs_monoeasy.\

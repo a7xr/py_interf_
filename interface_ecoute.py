@@ -708,7 +708,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def sizeHint(self):
-        return QtCore.QSize(1000, 500)
+        return QtCore.QSize(1000, 700)
 
 
 
@@ -1121,7 +1121,6 @@ class MainWindow(QtGui.QMainWindow):
             
             # fin_else(else veut dire qu'on est AU dernier ligne du file.xlsx)
 
-        # print "query_insert dans import_xls __code002__: " + query_insert
         query_insert = query_insert[:-2]
         # print query_insert
         # # INSERT INTO prj_ecoute01 (chemin__a_partir_root, root_local, root_distant, telechargee, fini, multi_easycode, table_campagne) VALUES ( '2017\11\08\15\02\500003e0aa8c000000a805a031c9006790010f3360001000101.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240025, 'ct_NIP_2018'), ( '2017\11\08\15\02\580003e0aa8c000000a805a031c9f067c0010f33c0001000018.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240026, 'ct_NIP_2018'), ( '2017\11\08\15\03\270003e0aa8c000000a805a031cbc06830010f34b0001000115.wav', '.\ecoute_enreg\', '\\mcuci\Storage$\', '0', '0', 19240026, 'ct_NIP_2018')
@@ -1981,38 +1980,12 @@ class MainWindow(QtGui.QMainWindow):
             "Reinitialiser"
         )
 
-        self.bouton_test = QtGui.QPushButton(
-            "Monter les Serveurs"
-        )
-
+        
         self.bouton_reinit_elemS.clicked.connect(
             self.remove_all_qtlist_multieasycode
             # (
                 # text01 = "akondro"
             # )
-        )
-
-
-        self.bouton_test.clicked.connect(
-            # self.dl_fichier ## bouton_test_dl
-            # self.select_fichier_dl
-            # self.remove_all_qtlist_multieasycode
-            # self.samba_check_file
-            # self.extract01  # that one is going to extract some BASIC info from sql_server
-                            # # you should delete that one
-            # self.umount_samba_server
-            # self.lire_xlsx_campagne 
-            # self.dialog_enregistrement 
-            # self.del_all_sources
-            # self.select_list_campagne
-            # self.check_existance_pg_int
-            # self.add_single_song_to_playlist
-            self.mount_samba_server
-            # self.to_del001
-        )
-
-        self.bouton_play_audio = QtGui.QPushButton(
-            "Jouer"
         )
 
         self.pauseAction = QtGui.QAction(
@@ -2237,8 +2210,6 @@ class MainWindow(QtGui.QMainWindow):
     def clicked_button_dialog(self):
         print "clicked button inside dialog"
 
-
-
     def setupUi(self):
         bar = QtGui.QToolBar()
         qtool_bar02 = QtGui.QToolBar()
@@ -2278,6 +2249,16 @@ class MainWindow(QtGui.QMainWindow):
         self.bouton_reinit_source.clicked.connect(
             self.del_all_sources
         )
+
+
+
+        # self.tabwidget = QtGui.QTabWidget()
+        # self.to_del_qplain01 = QtGui.QPlainTextEdit()
+        # self.tabwidget.addTab(self.to_del_qplain01, 'QTab Special')
+# 
+        # vlayout = QtGui.QVBoxLayout()
+        # vlayout.addWidget(self.tabwidget)
+
 
 
         self.musicTable = QtGui.QTableWidget(0, 4)
@@ -2389,6 +2370,25 @@ class MainWindow(QtGui.QMainWindow):
 
         # dans _ def setupUi(self):
 
+
+        self.tabwidget = QtGui.QTabWidget()
+        
+        self.tab_excel_down = QtGui.QWidget()
+        self.tab_saisie_down = QtGui.QWidget()
+
+        self.button_test = QtGui.QPushButton(self.tab_excel_down)
+        self.button_test.setGeometry(QtCore.QRect(100, 40, 75, 23))
+        
+        vlayout = QtGui.QVBoxLayout()
+        self.tabwidget.addTab(self.tab_saisie_down, 'Saisie')
+        self.tabwidget.addTab(self.tab_excel_down, 'Excel')
+
+        vlayout.addWidget(self.tabwidget)
+
+
+
+        # mettre en place les layouts
+
         mainLayout = QtGui.QVBoxLayout()
         qvbox_layout_music_table01 = QtGui.QHBoxLayout()
         qvbox_layout_music_table02 = QtGui.QHBoxLayout()
@@ -2420,6 +2420,9 @@ class MainWindow(QtGui.QMainWindow):
             qvbox_layout_music_table01
         )
 
+        mainLayout.addLayout(
+            vlayout
+        )
               
 
         mainLayout.addLayout(

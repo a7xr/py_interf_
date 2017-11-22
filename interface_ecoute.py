@@ -860,8 +860,8 @@ class MainWindow(QtGui.QMainWindow):
 
         return plusieurs_monoeasy
         #fin select_chemin
-    
 
+    
     # ceci est faite apres choix de campagne dans le combo_box
     # # on arrive ici quand self.table_campagne01 est remplit
     def import_xls(self,
@@ -1123,8 +1123,12 @@ class MainWindow(QtGui.QMainWindow):
             self.umount_samba_server()
             self.msg_box_information(
                 "Relation fichier Excel et la Campagne choisie",
-                "La Campagne que vous avez choisie n'est PAS Compatible au fichier Excel" \
+                "Incoherence de table( "+ self.table_campagne01 +" ) et easycode(" + monoeasy+ ")"\
                 + "\n- Erreur dans Psycopg"
+            )
+            self.logging_n_print(
+                type_log = "warning",
+                txt = "Incoherence de table( "+ self.table_campagne01 +" ) et easycode(" + monoeasy+ ")"
             )
             # sys.exit(0)
             return

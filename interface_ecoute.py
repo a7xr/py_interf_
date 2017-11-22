@@ -861,7 +861,7 @@ class MainWindow(QtGui.QMainWindow):
         return plusieurs_monoeasy
         #fin select_chemin
 
-
+    
     # ceci est faite apres choix de campagne dans le combo_box
     # # on arrive ici quand self.table_campagne01 est remplit
     def import_xls(self,

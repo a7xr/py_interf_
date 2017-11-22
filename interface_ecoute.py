@@ -2378,10 +2378,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # dans _ def setupUi(self):
 
+
+
+        # mnw anle layout
+
         mainLayout = QtGui.QVBoxLayout()
         qvbox_layout_music_table01 = QtGui.QHBoxLayout()
         qvbox_layout_music_table02 = QtGui.QHBoxLayout()
-        
+        layout_for_tab = QtGui.QVBoxLayout()
 
 
         qvbox_layout_music_table01.addWidget(self.combo_box__campagne)

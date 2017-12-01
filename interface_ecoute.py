@@ -25,7 +25,7 @@ path_prg = 'E:\\DISK_D\\mamitiana\\kandra\\ecoute_enregistrement\\'
 path_folder_conf = 'E:\\DISK_D\\mamitiana\\kandra\\do_not_erase\\our_tools\\'
 
 parser = SafeConfigParser()
-parser.read(path_folder_conf + 'all_confs.ini')
+parser.read(path_folder_conf + 'all_confs.txt')
 
 from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui
@@ -138,8 +138,17 @@ class MainWindow(QtGui.QMainWindow):
         self.temp_avant_rdmt = 1
 
 
+    def test11515151(self):
+        self.qtable_edit_enreg.setRowCount(0);
+        pass
 
-
+    def disp_easyc_to_playl_edit(
+            self,
+            easycode
+    ):
+        ## mnw requete maka IREO enregistrements mfandray am _easycode_
+        ## Alefa any am self.qtable_edit_enreg IREO enregistrements
+        pass
 
     def changed_music_table(self):
         print "changed"
@@ -690,7 +699,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def sizeHint(self):
-        return QtCore.QSize(1000, 750)
+        return QtCore.QSize(1000, 1550)
 
 
     
@@ -1611,6 +1620,10 @@ class MainWindow(QtGui.QMainWindow):
         displayTime = QtCore.QTime(0, (time / 60000) % 60, (time / 1000) % 60)
         self.timeLcd.display(displayTime.toString('mm:ss'))
 
+    def clicked_table_edit(self):
+        print "Clicked table_edit"
+        pass
+
     def tableClicked(self, row, column):
         wasPlaying = (self.mediaObject.state() == Phonon.PlayingState)
 
@@ -2219,6 +2232,7 @@ class MainWindow(QtGui.QMainWindow):
     def clicked_button_dialog(self):
         print "clicked button inside dialog"
 
+    
 
 
     def setupUi(self):
@@ -2265,7 +2279,7 @@ class MainWindow(QtGui.QMainWindow):
         self.musicTable = QtGui.QTableWidget(0, 4)
         self.musicTable.setStyleSheet(
             '''
-            QTableWidget { max-width: 1000px; min-height: 200px;}
+            QTableWidget { max-width: 1000px; min-height: 50px;}
             '''
             )
 
@@ -2273,8 +2287,16 @@ class MainWindow(QtGui.QMainWindow):
 
 
         self.qtable_edit_enreg = QtGui.QTableWidget(0, 1) 
+        self.qtable_edit_enreg.setStyleSheet(
+            '''
+            QTableWidget { max-width: 1000px; min-height: 100px;}
+            '''
+        )
+        self.qtable_edit_enreg.setRowCount(5)
+        self.qtable_edit_enreg.setColumnCount(2)
         self.qtable_edit_enreg_item = QtGui.QTableWidgetItem("Test001") 
         self.qtable_edit_enreg.setItem(0, 0, self.qtable_edit_enreg_item)
+        self.qtable_edit_enreg.setItem(0, 1, self.qtable_edit_enreg_item)
         # self.qtable_edit_enreg.setStyleSheet(
             # '''
             # QTableWidget { max-width: 1000px; min-height: 200px;}
@@ -2289,7 +2311,7 @@ class MainWindow(QtGui.QMainWindow):
             QtGui.QAbstractItemView.SelectRows
         )
         self.qtable_edit_enreg.cellPressed.connect(
-            self.tableClicked
+            self.clicked_table_edit
         )
        
 
@@ -2396,15 +2418,26 @@ class MainWindow(QtGui.QMainWindow):
         self.tab_saisie_down = QtGui.QWidget()
 
         self.plain_txt_easycode = QtGui.QPlainTextEdit(self.tab_saisie_down)
-        self.button_display_to_playlist = QtGui.QPushButton(
+        self.button_display_easyc_to_playlist_edit = QtGui.QPushButton(
             "Click3635689", 
             self.tab_saisie_down
         )
-        self.button_display_to_playlist.clicked.connect(
+        
+        self.button_display_easyc_to_playlist_edit.clicked.connect(
             self.take_list_easycode_to_playlist
         )
-        self.button_display_to_playlist.setGeometry(
+        self.button_display_easyc_to_playlist_edit.setGeometry(
             QtCore.QRect(350, 50, 150, 23))
+
+        self.button_test002 = QtGui.QPushButton(
+            "button_test", 
+            self.tab_saisie_down
+        )
+        self.button_test002.clicked.connect(
+            self.test11515151
+        )
+        self.button_test002.setGeometry(
+            QtCore.QRect(550, 50, 150, 23))
 
         self.combo_box__campagne = QtGui.QComboBox(self.tab_excel_down)
         self.combo_box__campagne.setGeometry(QtCore.QRect(50, 50, 150, 23))

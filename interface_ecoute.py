@@ -2323,9 +2323,9 @@ class MainWindow(QtGui.QMainWindow):
         self.qtable_edit_enreg.cellPressed.connect(
             self.clicked_table_edit
         )
-       
 
-        self.combo_box__campagne = QtGui.QComboBox()
+
+        # self.combo_box__campagne = QtGui.QComboBox()
 
         self.qtlist_dldd = QtGui.QListWidget()
         
@@ -2340,24 +2340,24 @@ class MainWindow(QtGui.QMainWindow):
         self.qtlist_monoeasycode = QtGui.QListWidget()
         
 
-        self.combo_box__campagne.setStyleSheet('''
-            QComboBox { max-width: 1000px; min-height: 20px;}
-            '''
-        )
+        # self.combo_box__campagne.setStyleSheet('''
+            # QComboBox { max-width: 1000px; min-height: 20px;}
+            # '''
+        # )
 
 
 
-        self.combo_box__campagne.addItems(
-            # ["campagne01", "campagne02", "campagne03"]
-            self.select_list_campagne()
-        )
+        # self.combo_box__campagne.addItems(
+            # # ["campagne01", "campagne02", "campagne03"]
+            # self.select_list_campagne()
+        # )
 
         #~ ##liaison des elem_graphique avec meth01
-        self.combo_box__campagne.\
-            currentIndexChanged.\
-            connect(
-                self.selection_change_combo_campagne
-            )
+        # self.combo_box__campagne.\
+            # currentIndexChanged.\
+            # connect(
+                # self.selection_change_combo_campagne
+            # )
 
 
 
@@ -2377,7 +2377,7 @@ class MainWindow(QtGui.QMainWindow):
         # etat des self.(
         #    combo_box__campagne)
         # # au temps = 0
-        self.combo_box__campagne.setEnabled(True)
+        # self.combo_box__campagne.setEnabled(True)
         
 
         self.musicTable.setHorizontalHeaderLabels(headers)
@@ -2428,6 +2428,9 @@ class MainWindow(QtGui.QMainWindow):
         self.tab_saisie_down = QtGui.QWidget()
 
         self.plain_txt_easycode = QtGui.QPlainTextEdit(self.tab_saisie_down)
+        self.plain_txt_easycode.setGeometry(
+            QtCore.QRect(0, 0, 250, 90)
+        )
         self.button_display_easyc_to_playlist_edit = QtGui.QPushButton(
             "Click3635689", 
             self.tab_saisie_down
@@ -2447,7 +2450,8 @@ class MainWindow(QtGui.QMainWindow):
             self.test11515151
         )
         self.button_test002.setGeometry(
-            QtCore.QRect(550, 50, 150, 23))
+            QtCore.QRect(550, 50, 150, 23)
+        )
 
         self.combo_box__campagne = QtGui.QComboBox(self.tab_excel_down)
         self.combo_box__campagne.setGeometry(QtCore.QRect(50, 50, 150, 23))
@@ -2466,6 +2470,33 @@ class MainWindow(QtGui.QMainWindow):
         )
         self.combo_box__campagne.setEnabled(True)
         
+
+
+
+
+
+
+
+        self.combo_box__campagne_at_tab_saisie = QtGui.QComboBox(self.tab_saisie_down)
+        self.combo_box__campagne_at_tab_saisie.setGeometry(
+            QtCore.QRect(0, 90, 150, 23)
+        )
+        self.combo_box__campagne_at_tab_saisie.setStyleSheet('''
+                    QComboBox { max-width: 1000px; min-height: 20px;}
+                    '''
+        )
+        self.combo_box__campagne_at_tab_saisie.addItems(
+                    # ["campagne01", "campagne02", "campagne03"]
+                    self.select_list_campagne()
+                )
+        self.combo_box__campagne_at_tab_saisie.\
+                currentIndexChanged.\
+                connect(
+                    self.selection_change_combo_campagne
+        )
+        self.combo_box__campagne_at_tab_saisie.setEnabled(True)
+        
+
         self.bouton_reinit_elemS = QtGui.QPushButton(
             self.tab_excel_down
         )

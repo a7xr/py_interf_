@@ -2441,7 +2441,7 @@ class MainWindow(QtGui.QMainWindow):
         )
         self.button_display_easyc_to_playlist_edit.setGeometry(
             QtCore.QRect(350, 50, 150, 23))
-
+  
         self.button_test002 = QtGui.QPushButton(
             "button_test", 
             self.tab_saisie_down

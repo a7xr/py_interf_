@@ -729,6 +729,7 @@ class MainWindow(QtGui.QMainWindow):
         - ceci est pour la connection aa la bdd
         """
         import _mssql
+
         self.conn_sql_server = _mssql.connect(
             server=server01, 
             user=user01, 
@@ -805,7 +806,62 @@ class MainWindow(QtGui.QMainWindow):
             )
                 sys.exit(0)
 
+    def disp_easyc_to_table_edit(self):
+
+        # alaina ilai combo_box__campagne_at_tab_saisie<<<<<<<<<<
+        tmp_campagne = self.combo_box__campagne_at_tab_saisie.currentText()
+        # # alaina ny table reliee amn
+        tmp_table_campagne01 = self.campagne__table_campagne.get(
+            tmp_campagne
+        )
+        # alaina ilay zvt at plain_text
+        list_easycode = self.plain_txt_easycode.toPlainText().split()
+        # formena ilay requete
         
+        for easycode in list_easycode:
+            
+            cheminS = self.select_chemin_v02(
+                real_table_campagne = tmp_table_campagne01,
+                easycode = easycode
+            )
+            # print cheminS
+            # # [u'2017\\11\\08\\15\\02\\580003e0aa8c000000a805a031c9f067c0010f33c0001000018.wav', u'2017\\11\\08\\15\\03\\270003e0aa8c000000a805a031cbc06830010f34b0001000115.wav']
+
+            # alaina ny isany cheminS <<<<<<<<<<<<<<<<<<<
+            compt_cheminS = len(cheminS)
+            self.qtable_edit_enreg.setRowCount(compt_cheminS)
+            self.qtable_edit_enreg.setColumnCount(3)
+            
+            for chemin in cheminS:
+                # ini no anovana ny isany ho_affichena ary amny self.qtable_edit_enreg
+                item_table_edit_chemin = QtGui.QTableWidgetItem(chemin) 
+                item_table_edit_easycode = QtGui.QTableWidgetItem(easycode) 
+                item_table_edit_rmq = QtGui.QTableWidgetItem("rmq001") 
+                # atao am self.qtable_edit_enreg ny cheminS
+                
+                self.qtable_edit_enreg.setItem(0, 0, item_table_edit_chemin)
+                # self.qtable_edit_enreg.setItem(0, 1, easycode)
+                self.qtable_edit_enreg.setItem(0, 1, item_table_edit_easycode)
+                self.qtable_edit_enreg.setItem(0, 2, item_table_edit_rmq)
+                # alaina ny isany cheminS
+                # ini no anovana ny isany ho_affichena ary amny self.qtable_edit_enreg
+                # atao am self.qtable_edit_enreg ny cheminS
+
+
+            pass
+        # apdirn ilay requete
+        # jerena ilay resultat_requete01
+
+
+
+
+        # alaina ilai campagne_at_tab_saisie
+        # alaina ilay zvt at plain_text
+        # formena ilay requete
+        # apdirn ilay requete
+        # jerena ilay resultat_requete01
+        pass
+    
     def msg_box_information(self, titre, txt):
         QtGui.QMessageBox.information(
                 self, 
@@ -813,6 +869,46 @@ class MainWindow(QtGui.QMainWindow):
                 txt
         )
 
+    def select_chemin_v02(self,
+            real_table_campagne = 'ct_NIP_2018',
+            easycode = '19240025'
+    ):
+        req = "SELECT substring(time_stamp, 1, 4) "\
+            +"+ '\\' + substring(time_stamp, 5, 2) "\
+            +"+ '\\' + substring(time_stamp, 7, 2) "\
+            +"+ '\\' + substring(time_stamp, 9, 2) "\
+            +"+ '\\' + substring(time_stamp, 11, 2) "\
+            +"+ '\\' + substring(time_stamp, 13, 5) "\
+            +"+ rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE "\
+            +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+            + "easy.dbo."\
+            +real_table_campagne\
+            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
+            + real_table_campagne \
+            + ".easycode " \
+            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
+            +"INNER JOIN easy.dbo.call_thread " \
+            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
+            +"WHERE easy.dbo."\
+            +real_table_campagne \
+            + ".easycode = "\
+            +str(easycode) +")"            
+        # print req
+        # return
+        try:
+            self.conn_sql_server.execute_query(req)
+        except _mssql.MSSQLDatabaseException:
+            self.msg_box_information(
+                "Relation fichier Excel et la Campagne choisie",
+                "Erreur de requete SQL_Serveur"
+            )
+        cheminS = []
+        for row in self.conn_sql_server:
+            cheminS.append(row['chemin'])
+
+        return cheminS
+
+        pass
 
     def select_chemin(self,
             bool01 = True,
@@ -839,7 +935,7 @@ class MainWindow(QtGui.QMainWindow):
             + ".easycode = "\
             +str(multieasy) +")"
 
-        print req
+        # print req
 # 
         # sys.exit(0)
 
@@ -2302,6 +2398,7 @@ class MainWindow(QtGui.QMainWindow):
             QTableWidget { max-width: 1000px; min-height: 100px;}
             '''
         )
+        
         self.qtable_edit_enreg.setRowCount(5)
         self.qtable_edit_enreg.setColumnCount(2)
         self.qtable_edit_enreg_item = QtGui.QTableWidgetItem("Test001") 
@@ -2437,7 +2534,7 @@ class MainWindow(QtGui.QMainWindow):
         )
         
         self.button_display_easyc_to_playlist_edit.clicked.connect(
-            self.take_list_easycode_to_playlist
+            self.disp_easyc_to_table_edit
         )
         self.button_display_easyc_to_playlist_edit.setGeometry(
             QtCore.QRect(350, 50, 150, 23))

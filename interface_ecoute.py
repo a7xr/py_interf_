@@ -954,7 +954,7 @@ class MainWindow(QtGui.QMainWindow):
                 + "\n- Erreur dans SQL_Serveur"
                 )
 
-        #dans select_chemin
+        #dans select_chemin 
 
         plusieurs_monoeasy = []
         for row in self.conn_sql_server:

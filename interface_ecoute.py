@@ -811,7 +811,7 @@ class MainWindow(QtGui.QMainWindow):
                 self, 
                 titre, 
                 txt
-                )
+        )
 
 
     def select_chemin(self,
@@ -953,7 +953,7 @@ class MainWindow(QtGui.QMainWindow):
             # # on demonte les serveurs grace aa self.umount_samba_server
             # # qui se trouve en bas
             ###essaie de supprimer ceci##########################
-            self.mount_samba_server()
+            # self.mount_samba_server()
             ###essaie de supprimer la ligne du dessus############
 
         else:
@@ -1084,8 +1084,12 @@ class MainWindow(QtGui.QMainWindow):
                         ):
                             root_distant = "\\\\mcuci\\Storage$\\"
                         else:
-                            msg_box_information("Fichier inexistant",
-                                "Le fichier que vous cherchez n'existe pas")
+                            msg_box_information(
+                                "Fichier inexistant",
+                                "Le fichier que vous cherchez n'existe pas\n- ou vous n'avez pas access au Serveur(\\\\192.168.10.19\\voice\\, \\\\mcuci\\Storage$)"
+                            )
+
+                            return
 
                     if cpt_chm != (len(cheminS) - 1):
                         query_insert += "( '"
@@ -1127,7 +1131,8 @@ class MainWindow(QtGui.QMainWindow):
         try:
             self.cursor_pg_local.execute(query_insert)
         except psycopg2.ProgrammingError:
-            self.umount_samba_server()
+            ###essaie de supprimer ceci##########################
+            # self.umount_samba_server()
             self.msg_box_information(
                 "Relation fichier Excel et la Campagne choisie",
                 "Incoherence de table( "+ self.table_campagne01 +" ) et easycode(" + monoeasy+ ")"\
@@ -1165,8 +1170,8 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.qtlist_multieasycode.\
                     addItem(str(elem))
-
-        self.umount_samba_server()
+        ###essaie de supprimer ceci##########################
+        # self.umount_samba_server()
         #fin_import_xls
 
 
@@ -1717,7 +1722,8 @@ class MainWindow(QtGui.QMainWindow):
         print "clicked ajouter au dialog"
 
     def closeEvent(self, *args, **kwargs):
-        self.umount_samba_server()
+        ###essaie de supprimer ceci##########################
+        # self.umount_samba_server()
         for i in range(3):
             self.logging_n_print(txt = "")
         self.logging_n_print(txt = "closed")
@@ -1805,13 +1811,16 @@ class MainWindow(QtGui.QMainWindow):
                 )
                 self.msg_box_information("Veuillez Patienter",
                     "Téléchargement à partir du Serveur")
-                self.mount_samba_server()
+                ###essaie de supprimer ceci##########################
+                # self.mount_samba_server()
                 try:
                     shutil.copy(remote_file01, sauvegardee_dans)
                 except IOError:
                     print "ooops IOError"
                 finally:
-                    self.umount_samba_server()
+                    ###essaie de supprimer ceci##########################
+                    # self.umount_samba_server()
+                    pass
 
 
     def metaStateChanged(self, newState, oldState):
@@ -2009,8 +2018,9 @@ class MainWindow(QtGui.QMainWindow):
             # self.del_all_sources
             # self.select_list_campagne
             # self.check_existance_pg_int
-            # self.add_single_song_to_playlist
-            self.mount_samba_server
+            self.add_single_song_to_playlist
+            ###essaie de supprimer ceci##########################
+            # self.mount_samba_server
             # self.to_del001
         )
 
@@ -2433,7 +2443,7 @@ class MainWindow(QtGui.QMainWindow):
             "button_test", 
             self.tab_saisie_down
         )
-        self.button_test002.clicked.connect(
+        self.button_test002.clicked.connect( 
             self.test11515151
         )
         self.button_test002.setGeometry(

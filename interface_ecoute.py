@@ -144,7 +144,74 @@ class MainWindow(QtGui.QMainWindow):
         pass
 
     def double_clicked_qtable_edit_enreg(self):
-        print "pass 6549876213216579"
+
+        self.root_local = ".\\ecoute_enreg\\"
+        chemin_sans_root = self.qtable_edit_enreg.currentItem().text()
+
+        file01 = Path(self.root_local + chemin_sans_root[-55:])
+
+        # print "self.root_local + chemin_sans_root: ", (self.root_local + chemin_sans_root[-55:])
+        # # .\ecoute_enreg\500003e0aa8c000000a805a031c9006790010f3360001000101.wav
+
+        
+
+        if(file01.is_file()):
+            # print "niditra ato"
+            self.add_single_song_to_playlist(
+                    path_audio = self.root_local + str(chemin_sans_root)[-55:]
+            )
+            return
+            pass
+
+        # verifiena any am voice        <<<<<<<<<<<<<<<<<
+        # # rah hita ato tode m_voka
+        # verifiena any am storage
+        serveur_voice = "\\\\192.168.10.19\\voice\\"
+        
+        chemin_fichier_dans_voice = serveur_voice + chemin_sans_root
+        # print "chemin_fichier_dans_voice: ", chemin_fichier_dans_voice
+        # sys.exit(0)
+        file01 = Path(chemin_fichier_dans_voice)
+        
+        if (file01.is_file()):
+            # verifiena any am voice        
+            # # rah hita ato tode m_voka    <<<<<<<<<<<<<<<<<
+            # verifiena any am storage
+            # print "chemin_fichier_dans_voice: ", chemin_fichier_dans_voice
+            self.dl_fichier(
+                remote_file01 = chemin_fichier_dans_voice,
+                sauvegardee_dans = self.root_local + str(chemin_fichier_dans_voice)[-55:]
+            )
+            self.add_single_song_to_playlist(
+                    path_audio = self.root_local + str(chemin_fichier_dans_voice)[-55:]
+            )
+            # self.add_single_song_to_playlist(
+                # path_audio = chemin_fichier_dans_voice
+            # )
+
+        else :
+            # print "heyyy yet6549879561"
+            serveur_storage = "\\\\mcuci\\Storage$\\"
+            chemin_fichier_dans_storage = serveur_storage + chemin_sans_root
+            file01 = Path(chemin_fichier_dans_storage)
+            if (file01.is_file()):
+                # print "chemin_fichier_dans_storage: ", chemin_fichier_dans_storage
+                self.dl_fichier(
+                    remote_file01 = chemin_fichier_dans_storage,
+                    sauvegardee_dans = self.root_local + str(chemin_fichier_dans_storage)[-55:]
+                )
+                self.add_single_song_to_playlist(
+                    path_audio = self.root_local + str(chemin_fichier_dans_storage)[-55:]
+                )
+            else:
+                print "not yet69789432365983"
+
+        samba_ = "\\\\192.168.10.19\\voice\\"
+
+        # verifiena any am voice
+        # # rah hita ato tode m_voka
+        # verifiena any am storage
+
         pass
 
     def disp_easyc_to_playl_edit(
@@ -565,6 +632,7 @@ class MainWindow(QtGui.QMainWindow):
         # # [<PyQt4.QtCore.QModelIndex object at 0x0522C7A0>]
         for index in sorted(indexes):
             # print('Row %d is selected' % index.row())
+            # # Row 1 is selected
             self.clicked_enreg = self.\
                 list__dl_fini_chemin_easycode[index.row()][2]
 
@@ -605,11 +673,7 @@ class MainWindow(QtGui.QMainWindow):
         # ty iz no mi_ajoutee ani am playlist
         chemin_enreg__local01 = self.root_local \
             + str(self.chemin_sans_root)[-55:]
-        # self.sources.append(
-            # Phonon.MediaSource(
-                # chemin_enreg__local01
-            # )
-        # )
+        
         self.add_single_song_to_playlist(
             path_audio = chemin_enreg__local01
             )
@@ -659,7 +723,8 @@ class MainWindow(QtGui.QMainWindow):
         + self.qtlist_multieasycode.currentItem().text()\
         + "ORDER BY chemin__a_partir_root"
 
-        self.logging_n_print(type_log = "info",
+        self.logging_n_print(
+            type_log = "info",
             txt = "Easycode: "+self.qtlist_multieasycode.currentItem().text()
         )
 
@@ -815,14 +880,90 @@ class MainWindow(QtGui.QMainWindow):
 
         # alaina ilai combo_box__campagne_at_tab_saisie<<<<<<<<<<
         tmp_campagne = self.combo_box__campagne_at_tab_saisie.currentText()
+        # print "tmp_campagne: ", tmp_campagne
+        # # NOMINATION NIP
+        
         # # alaina ny table reliee amn
         tmp_table_campagne01 = self.campagne__table_campagne.get(
             tmp_campagne
         )
+        # print "tmp_table_campagne01: ", tmp_table_campagne01
+        # # ct_NIP_2018
         # alaina ilay zvt at plain_text
         list_easycode = self.plain_txt_easycode.toPlainText().split()
         # formena ilay requete
         
+        list_easycode_str = ', '.join(list_easycode)
+        # print list_easycode_str
+        # # 19240025, 19240026
+        # sys.exit(0)
+
+
+
+
+        # isaina ny isany enregistrement izai azo   <<<<<<<<<<<<<
+        # # mamboatra requete izai manao anzai      <<<<<<<<<<<<<
+        # mnw anle isany item_s ho_ao am qtable_edit
+        req = "SELECT count(*) as number FROM AVR7.dbo.recording WHERE "\
+            +"rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM " \
+            + "easy.dbo."\
+            +tmp_table_campagne01\
+            +" INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo." \
+            + tmp_table_campagne01 \
+            + ".easycode " \
+            +"INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code " \
+            +"INNER JOIN easy.dbo.call_thread " \
+            +"ON easy.dbo.thread.code = easy.dbo.call_thread.code " \
+            +"WHERE easy.dbo."\
+            +tmp_table_campagne01 \
+            + ".easycode IN ( "\
+            +str(list_easycode_str) +"))" 
+
+
+        
+
+        # print req
+        # # SELECT substring(time_stamp, 1, 4) + '\' + substring(time_stamp, 5, 2) + '\' + substring(time_stamp, 7, 2) + '\' + substring(time_stamp, 9, 2) + '\' + substring(time_stamp, 11, 2) + '\' + substring(time_stamp, 13, 5) + rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM easy.dbo.ct_NIP_2018 INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo.ct_NIP_2018.easycode INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code INNER JOIN easy.dbo.call_thread ON easy.dbo.thread.code = easy.dbo.call_thread.code WHERE easy.dbo.ct_NIP_2018.easycode IN ( 19240025, 19240026))
+
+        try:
+            self.conn_sql_server \
+                .execute_query(req)
+        except _mssql.MSSQLDatabaseException:
+            self.msg_box_information(
+                 "Relation fichier Excel et la Campagne choisie",
+                "La Campagne que vous avez choisie n'est PAS Compatible au fichier Excel" \
+                + "\n- Erreur dans SQL_Serveur"
+            )
+
+        # number =  self.conn_sql_server[0][0]
+        for row in self.conn_sql_server:
+            # print "row: ", row
+            # # row:  {0: 3, u'number': 3}
+            number = row['number']
+            # print "number: ", number
+            # # number: 3
+
+
+        # isaina ny isany enregistrement izai azo
+        # # mamboatra requete izai manao anzai
+        # mnw anle isany item_s ho_ao am qtable_edit <<<<<<<<<<<<<
+
+        self.qtable_edit_enreg.setRowCount(number)
+        self.qtable_edit_enreg.setColumnCount(3)
+
+        self.qtable_edit_enreg.setHorizontalHeaderLabels(
+            ['Chemin', 'Easycode', 'Remarque']
+        )
+
+
+        
+
+        list_easycode = sorted(list(set(list_easycode)))
+        # print "list_easycode: ", list_easycode
+        # # [u'19240025', u'19240026']
+        # return
+
+        i = 0
         for easycode in list_easycode:
             
             cheminS = self.select_chemin_v02(
@@ -833,13 +974,9 @@ class MainWindow(QtGui.QMainWindow):
             # # [u'2017\\11\\08\\15\\02\\580003e0aa8c000000a805a031c9f067c0010f33c0001000018.wav', u'2017\\11\\08\\15\\03\\270003e0aa8c000000a805a031cbc06830010f34b0001000115.wav']
 
             # alaina ny isany cheminS <<<<<<<<<<<<<<<<<<<
-            compt_cheminS = len(cheminS)
-            self.qtable_edit_enreg.setRowCount(compt_cheminS)
-            self.qtable_edit_enreg.setColumnCount(3)
-
-            self.qtable_edit_enreg.setHorizontalHeaderLabels(
-                ['Chemin', 'Easycode', 'Remarque']
-            )
+            # compt_cheminS = len(cheminS)
+            # self.qtable_edit_enreg.setRowCount(compt_cheminS)
+            
             
             for chemin in cheminS:
                 # ini no anovana ny isany ho_affichena ary amny self.qtable_edit_enreg
@@ -851,10 +988,12 @@ class MainWindow(QtGui.QMainWindow):
                 item_table_edit_rmq = QtGui.QTableWidgetItem("") 
                 # atao am self.qtable_edit_enreg ny cheminS
                 
-                self.qtable_edit_enreg.setItem(0, 0, item_table_edit_chemin)
+                self.qtable_edit_enreg.setItem(i, 0, item_table_edit_chemin)
                 # self.qtable_edit_enreg.setItem(0, 1, easycode)
-                self.qtable_edit_enreg.setItem(0, 1, item_table_edit_easycode)
-                self.qtable_edit_enreg.setItem(0, 2, item_table_edit_rmq)
+                self.qtable_edit_enreg.setItem(i, 1, item_table_edit_easycode)
+                self.qtable_edit_enreg.setItem(i, 2, item_table_edit_rmq)
+
+                i = i+1
                 # alaina ny isany cheminS
                 # ini no anovana ny isany ho_affichena ary amny self.qtable_edit_enreg
                 # atao am self.qtable_edit_enreg ny cheminS
@@ -872,6 +1011,8 @@ class MainWindow(QtGui.QMainWindow):
         # formena ilay requete
         # apdirn ilay requete
         # jerena ilay resultat_requete01
+        self.list__dl_fini_chemin_easycode = [] * 100
+
         pass
     
     def msg_box_information(self, titre, txt):
@@ -948,7 +1089,8 @@ class MainWindow(QtGui.QMainWindow):
             +str(multieasy) +")"
 
         # print req
-# 
+        # # SELECT substring(time_stamp, 1, 4) + '\' + substring(time_stamp, 5, 2) + '\' + substring(time_stamp, 7, 2) + '\' + substring(time_stamp, 9, 2) + '\' + substring(time_stamp, 11, 2) + '\' + substring(time_stamp, 13, 5) + rec_key + rec_time +'.'+codec as chemin FROM AVR7.dbo.recording WHERE rec_key in (SELECT easy.dbo.[call_thread].[recording_key] FROM easy.dbo.ct_NIP_2018 INNER JOIN easy.dbo.data_context ON easy.dbo.data_context.contact = easy.dbo.ct_NIP_2018.easycode INNER JOIN easy.dbo.thread ON easy.dbo.thread.data_context = easy.dbo.data_context.code INNER JOIN easy.dbo.call_thread ON easy.dbo.thread.code = easy.dbo.call_thread.code WHERE easy.dbo.ct_NIP_2018.easycode = 19240025)
+
         # sys.exit(0)
 
         # print ""
@@ -2401,7 +2543,7 @@ class MainWindow(QtGui.QMainWindow):
             '''
             )
 
-        self.musicTable.itemClicked.connect(self.changed_music_table)
+        # self.musicTable.doubleClicked.connect(self.clicked_play_action)
 
 
         self.qtable_edit_enreg = QtGui.QTableWidget(0, 1) 

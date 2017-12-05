@@ -20,12 +20,13 @@ from pathlib import Path
 
 from ConfigParser import SafeConfigParser
 
-path_prg = 'E:\\DISK_D\\mamitiana\\kandra\\ecoute_enregistrement\\'
+# path_prg = 'E:\\DISK_D\\mamitiana\\kandra\\ecoute_enregistrement\\'
 
-path_folder_conf = 'E:\\DISK_D\\mamitiana\\kandra\\do_not_erase\\our_tools\\'
+# path_folder_conf = 'E:\\DISK_D\\mamitiana\\kandra\\do_not_erase\\our_tools\\'
 
 parser = SafeConfigParser()
-parser.read(path_folder_conf + 'all_confs.txt')
+# parser.read(path_folder_conf + 'all_confs.txt')
+parser.read('all_confs.txt')
 
 from xlrd import open_workbook
 from PyQt4 import QtCore, QtGui
@@ -140,6 +141,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def test11515151(self):
         self.qtable_edit_enreg.setRowCount(0);
+        pass
+
+    def double_clicked_qtable_edit_enreg(self):
+        print "pass 6549876213216579"
         pass
 
     def disp_easyc_to_playl_edit(
@@ -831,12 +836,19 @@ class MainWindow(QtGui.QMainWindow):
             compt_cheminS = len(cheminS)
             self.qtable_edit_enreg.setRowCount(compt_cheminS)
             self.qtable_edit_enreg.setColumnCount(3)
+
+            self.qtable_edit_enreg.setHorizontalHeaderLabels(
+                ['Chemin', 'Easycode', 'Remarque']
+            )
             
             for chemin in cheminS:
                 # ini no anovana ny isany ho_affichena ary amny self.qtable_edit_enreg
-                item_table_edit_chemin = QtGui.QTableWidgetItem(chemin) 
+                item_table_edit_chemin = QtGui.QTableWidgetItem(chemin)
+                item_table_edit_chemin.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled ) 
+
                 item_table_edit_easycode = QtGui.QTableWidgetItem(easycode) 
-                item_table_edit_rmq = QtGui.QTableWidgetItem("rmq001") 
+                item_table_edit_easycode.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )                 
+                item_table_edit_rmq = QtGui.QTableWidgetItem("") 
                 # atao am self.qtable_edit_enreg ny cheminS
                 
                 self.qtable_edit_enreg.setItem(0, 0, item_table_edit_chemin)
@@ -2282,7 +2294,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # les entetes du table_dialog
         self.qtable_at_dialog.setHorizontalHeaderLabels(
-            ['Download', 'Fini', 'Chemin', 'Easycode'])
+            ['Download', 'Fini', 'Chemin', 'Easycode']
+        )
 
         self.qtable_at_dialog\
             .doubleClicked.connect(
@@ -2302,7 +2315,6 @@ class MainWindow(QtGui.QMainWindow):
                         item.setCheckState(QtCore.Qt.Checked)
                         item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
                     self.qtable_at_dialog.setItem(row, col, item)
-
                 elif col == 1:
                     # Fini
                     item = QtGui.QTableWidgetItem()
@@ -2399,11 +2411,22 @@ class MainWindow(QtGui.QMainWindow):
             '''
         )
         
-        self.qtable_edit_enreg.setRowCount(5)
-        self.qtable_edit_enreg.setColumnCount(2)
-        self.qtable_edit_enreg_item = QtGui.QTableWidgetItem("Test001") 
-        self.qtable_edit_enreg.setItem(0, 0, self.qtable_edit_enreg_item)
-        self.qtable_edit_enreg.setItem(0, 1, self.qtable_edit_enreg_item)
+        self.qtable_edit_enreg\
+            .doubleClicked.connect(
+                self.double_clicked_qtable_edit_enreg
+        )
+
+        # self.qtable_edit_enreg.setRowCount(5)
+        # self.qtable_edit_enreg.setColumnCount(2)
+        # self.qtable_edit_enreg_item = QtGui.QTableWidgetItem("Test001") 
+        # self.qtable_edit_enreg.setItem(0, 0, self.qtable_edit_enreg_item)
+        # self.qtable_edit_enreg.setItem(0, 1, self.qtable_edit_enreg_item)
+        self.qtable_edit_enreg.setRowCount(0)
+        self.qtable_edit_enreg.setColumnCount(3)
+        self.qtable_edit_enreg.setHorizontalHeaderLabels(
+            # ['Chemin', 'Easycode', 'Remarque']
+            [' - ', ' - ', ' - ']
+        )
         # self.qtable_edit_enreg.setStyleSheet(
             # '''
             # QTableWidget { max-width: 1000px; min-height: 200px;}
